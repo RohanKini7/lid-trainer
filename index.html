@@ -124,6 +124,7 @@ details.rvd summary{cursor:pointer;color:var(--muted);font-size:.88rem;margin-to
 .xfer{margin-top:20px;border-top:1px solid var(--line);padding-top:16px;display:flex;flex-direction:column;gap:10px}
 .xfer textarea{font:inherit;font-family:var(--mono);font-size:.78rem;width:100%;min-height:76px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);word-break:break-all}
 .xmsg{font-size:.9rem;min-height:1.2em}
+.tqb{background:none;border:0;padding:0;color:var(--accent-ink);font-weight:600;font-size:.9rem;text-decoration:underline;text-underline-offset:3px;width:fit-content}
 .startbox{display:flex;flex-direction:column;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px}
 </style>
 <script>
@@ -245,7 +246,7 @@ function wireBm(root,q){const b=root.querySelector('[data-bm]');if(!b)return;b.o
 function vocabTable(q){return `<div><div class="vh">Vocabulary</div><div class="vwrap"><table class="vocab"><thead><tr><th>Deutsch</th><th>English</th></tr></thead><tbody>${q.v.map(r=>`<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td></tr>`).join("")}</tbody></table></div></div>`}
 function qHead(q,i,len,later){
   return `<div class="qmeta"><span class="mono">${i+1} / ${len}</span><span class="nr">Nr. ${q.n} · ${esc(tName(q.t))}</span></div>
-  <div class="qtop"><div style="min-width:0;flex:1"><div class="qde">${esc(q.q)}</div>${showEN?`<div class="qen"${later?" hidden":""}>${esc(q.e)}</div>`:""}</div>${bmBtn(q)}</div>${pic(q)}`;
+  <div class="qtop"><div style="min-width:0;flex:1"><div class="qde">${esc(q.q)}</div>${showEN||later?`<div class="qen"${later?" hidden":""}>${esc(q.e)}</div>`:""}</div>${bmBtn(q)}</div>${pic(q)}`;
 }
 
 function exportCode(){
@@ -368,11 +369,15 @@ function quiz(list,title,onBack){
     }
     const q=list[i];
     body.innerHTML=`<div class="qcard">${qHead(q,i,list.length,true)}
+      <button class="tqb" id="tqb">Translate question</button>
       <div class="opts">${q.o.map((o,k)=>`<button class="opt" data-k="${k}"><span class="l">${"abcd"[k]}</span><span>${esc(o)}<span class="oe" hidden>${esc(q.oe[k])}</span></span></button>`).join("")}</div>
       <div id="fb"></div></div>`;
     wireBm(body,q);
+    const tqb=body.querySelector("#tqb");
+    tqb.onclick=()=>{const e=body.querySelector(".qen");e.hidden=!e.hidden;tqb.textContent=e.hidden?"Translate question":"Hide translation"};
     body.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{
       if(body.querySelector(".opt.right"))return;
+      tqb.hidden=true;
       const ok=+b.dataset.k===q.a;if(ok)right++;save(q,ok);
       body.querySelectorAll(".opt")[q.a].classList.add("right");
       body.querySelectorAll(".oe,.qen").forEach(e=>e.hidden=false);
