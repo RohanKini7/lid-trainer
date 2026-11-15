@@ -120,6 +120,9 @@ a{color:var(--accent-ink)}
 .bm svg{width:13px;height:13px}
 .qtop{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
 details.rvd summary{cursor:pointer;color:var(--muted);font-size:.88rem;margin-top:6px}
+.xfer{margin-top:20px;border-top:1px solid var(--line);padding-top:16px;display:flex;flex-direction:column;gap:10px}
+.xfer textarea{font:inherit;font-family:var(--mono);font-size:.78rem;width:100%;min-height:76px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);word-break:break-all}
+.xmsg{font-size:.9rem;min-height:1.2em}
 .startbox{display:flex;flex-direction:column;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px}
 </style>
 <script>
@@ -244,6 +247,19 @@ function qHead(q,i,len){
   <div class="qtop"><div style="min-width:0;flex:1"><div class="qde">${esc(q.q)}</div>${showEN?`<div class="qen">${esc(q.e)}</div>`:""}</div>${bmBtn(q)}</div>${pic(q)}`;
 }
 
+function exportCode(){
+  return "LID1-"+(showEN?"1":"0")+Q.map(q=>{const s=stats[q.n];return (s?(s.r?1:2):0)+(isBm(q)?3:0)}).join("");
+}
+function importCode(code){
+  code=(code||"").replace(/\s+/g,"");
+  const m=/^LID1-([01])([0-5]+)$/.exec(code);
+  if(!m||m[2].length!==Q.length)return false;
+  const ns={},nb=new Set();
+  Q.forEach((q,i)=>{let v=+m[2][i];if(v>=3){nb.add(String(q.n));v-=3}if(v)ns[q.n]={r:v===1}});
+  stats=ns;bms=nb;showEN=m[1]==="1";
+  store.set("lid2-stats",stats);store.set("lid2-bm",[...bms]);store.set("lid-en",showEN);
+  return true;
+}
 function home(){
   clearInterval(timer);
   const d=daysLeft(),all=score(Q),wrong=Q.filter(q=>stats[q.n]&&!stats[q.n].r).length;
@@ -275,6 +291,16 @@ function home(){
     <button class="btn" id="new">Unseen questions (${Q.filter(q=>!stats[q.n]).length})</button>
     <button class="btn" id="rst">Reset progress</button>
   </div>
+  <section class="xfer">
+    <h3>Move progress to another device</h3>
+    <p class="muted" style="margin:0">Progress is saved separately on each phone and computer. Copy this code here, send it to yourself, and paste it on the other device. Importing replaces that device's progress.</p>
+    <textarea id="xcode" readonly aria-label="Your progress code">${exportCode()}</textarea>
+    <div class="row"><button class="btn" id="xcopy">Copy my code</button></div>
+    <label for="xin" class="muted">Paste a code from another device</label>
+    <textarea id="xin" placeholder="LID1-…"></textarea>
+    <div class="row"><button class="btn primary" id="ximp">Import progress</button></div>
+    <div class="xmsg" id="xmsg" role="status"></div>
+  </section>
   <p class="note">All 300 general questions and the 10 Bavaria questions from the BAMF catalogue (as of 07.05.2025). The catalogue doesn't mark answers, so the answer key and English translations were added for this app. Questions about current office holders (Nr. 72, 73, 75) can change, so check the news before the exam.</p>`;
   app.querySelector("#mk").onclick=mock;
   app.querySelector("#en").onchange=e=>{showEN=e.target.checked;store.set("lid-en",showEN)};
@@ -282,6 +308,10 @@ function home(){
   app.querySelector("#mist").onclick=()=>quiz(shuffle(Q.filter(q=>stats[q.n]&&!stats[q.n].r)),"My mistakes");
   app.querySelector("#bmk").onclick=()=>quiz(Q.filter(isBm),"Bookmarked questions");
   app.querySelector("#new").onclick=()=>quiz(shuffle(Q.filter(q=>!stats[q.n])).slice(0,20),"20 unseen questions");
+  const xm=app.querySelector("#xmsg"),xc=app.querySelector("#xcode");
+  app.querySelector("#xcopy").onclick=()=>{const done=()=>{xm.textContent="Copied. Paste it on your other device."};
+    try{navigator.clipboard.writeText(xc.value).then(done,()=>{xc.select();xm.textContent="Code selected. Copy it with your keyboard or the copy menu."})}catch(e){xc.select();xm.textContent="Code selected. Copy it with your keyboard or the copy menu."}};
+  app.querySelector("#ximp").onclick=()=>{if(importCode(app.querySelector("#xin").value)){home();const m=app.querySelector("#xmsg");m.textContent="Progress imported.";m.scrollIntoView({block:"center"})}else{xm.textContent="That code doesn't look right. Copy the whole code, starting with LID1-."}};
   const r=app.querySelector("#rst");r.onclick=()=>{if(r.dataset.c){stats={};store.set("lid2-stats",stats);home()}else{r.dataset.c=1;r.textContent="Tap again to confirm"}};
   window.scrollTo(0,0);
 }
