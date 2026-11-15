@@ -242,9 +242,9 @@ function pic(q){
 function bmBtn(q){return `<button class="bm" data-bm="${esc(q.n)}" aria-pressed="${isBm(q)}">${BM_SVG}<span>${isBm(q)?"Bookmarked":"Bookmark"}</span></button>`}
 function wireBm(root,q){const b=root.querySelector('[data-bm]');if(!b)return;b.onclick=()=>{toggleBm(q);b.setAttribute("aria-pressed",isBm(q));b.querySelector("span").textContent=isBm(q)?"Bookmarked":"Bookmark"}}
 function vocabTable(q){return `<div><div class="vh">Vocabulary</div><div class="vwrap"><table class="vocab"><thead><tr><th>Deutsch</th><th>English</th></tr></thead><tbody>${q.v.map(r=>`<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td></tr>`).join("")}</tbody></table></div></div>`}
-function qHead(q,i,len){
+function qHead(q,i,len,later){
   return `<div class="qmeta"><span class="mono">${i+1} / ${len}</span><span class="nr">Nr. ${q.n} · ${esc(tName(q.t))}</span></div>
-  <div class="qtop"><div style="min-width:0;flex:1"><div class="qde">${esc(q.q)}</div>${showEN?`<div class="qen">${esc(q.e)}</div>`:""}</div>${bmBtn(q)}</div>${pic(q)}`;
+  <div class="qtop"><div style="min-width:0;flex:1"><div class="qde">${esc(q.q)}</div>${showEN?`<div class="qen"${later?" hidden":""}>${esc(q.e)}</div>`:""}</div>${bmBtn(q)}</div>${pic(q)}`;
 }
 
 function exportCode(){
@@ -366,7 +366,7 @@ function quiz(list,title,onBack){
       body.querySelector("#home").onclick=onBack;return;
     }
     const q=list[i];
-    body.innerHTML=`<div class="qcard">${qHead(q,i,list.length)}
+    body.innerHTML=`<div class="qcard">${qHead(q,i,list.length,true)}
       <div class="opts">${q.o.map((o,k)=>`<button class="opt" data-k="${k}"><span class="l">${"abcd"[k]}</span><span>${esc(o)}<span class="oe" hidden>${esc(q.oe[k])}</span></span></button>`).join("")}</div>
       <div id="fb"></div></div>`;
     wireBm(body,q);
@@ -374,7 +374,7 @@ function quiz(list,title,onBack){
       if(body.querySelector(".opt.right"))return;
       const ok=+b.dataset.k===q.a;if(ok)right++;save(q,ok);
       body.querySelectorAll(".opt")[q.a].classList.add("right");
-      body.querySelectorAll(".oe").forEach(e=>e.hidden=false);
+      body.querySelectorAll(".oe,.qen").forEach(e=>e.hidden=false);
       if(!ok)b.classList.add("wrong");
       body.querySelector("#fb").innerHTML=`<div class="explain ${ok?"":"no"}"><b>${ok?"Richtig":"Falsch"}.</b> ${ok?"":esc(q.o[q.a])+" "}<span class="ea">(${esc(q.ea)})</span></div>
       ${vocabTable(q)}
