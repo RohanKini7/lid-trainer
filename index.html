@@ -397,7 +397,7 @@ function mock(){
   function render(){
     dots.innerHTML=list.map((x,n)=>`<i class="${n===i?"c":""}" style="${x.pick!==null?"background:var(--muted)":""}"></i>`).join("");
     const it=list[i],q=it.q;
-    body.innerHTML=`<div class="qcard">${qHead(q,i,33).replace(/Nr\. [^<]*/,i>=30?"Bayern":"Allgemein")}
+    body.innerHTML=`<div class="qcard">${qHead(q,i,33,true).replace(/Nr\. [^<]*/,i>=30?"Bayern":"Allgemein")}
       <div class="opts">${q.o.map((o,k)=>`<button class="opt ${it.pick===k?"sel":""}" data-k="${k}"><span class="l">${"abcd"[k]}</span><span>${esc(o)}</span></button>`).join("")}</div>
       <div class="row" style="justify-content:space-between">
         <button class="btn" id="pv" ${i?"":"disabled"}>← Back</button>
