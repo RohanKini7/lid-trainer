@@ -370,7 +370,7 @@ function quiz(list,title,onBack){
     const q=list[i];
     body.innerHTML=`<div class="qcard">${qHead(q,i,list.length,true)}
       <button class="tqb" id="tqb">Translate question</button>
-      <div class="opts">${q.o.map((o,k)=>`<button class="opt" data-k="${k}"><span class="l">${"abcd"[k]}</span><span>${esc(o)}<span class="oe" hidden>${esc(q.oe[k])}</span></span></button>`).join("")}</div>
+      <div class="opts">${shuffle([0,1,2,3]).map((k,p)=>`<button class="opt" data-k="${k}"><span class="l">${"abcd"[p]}</span><span>${esc(q.o[k])}<span class="oe" hidden>${esc(q.oe[k])}</span></span></button>`).join("")}</div>
       <div id="fb"></div></div>`;
     wireBm(body,q);
     const tqb=body.querySelector("#tqb");
@@ -379,7 +379,7 @@ function quiz(list,title,onBack){
       if(body.querySelector(".opt.right"))return;
       tqb.hidden=true;
       const ok=+b.dataset.k===q.a;if(ok)right++;save(q,ok);
-      body.querySelectorAll(".opt")[q.a].classList.add("right");
+      body.querySelector(`.opt[data-k="${q.a}"]`).classList.add("right");
       body.querySelectorAll(".oe,.qen").forEach(e=>e.hidden=false);
       if(!ok)b.classList.add("wrong");
       body.querySelector("#fb").innerHTML=`<div class="explain ${ok?"":"no"}"><b>${ok?"Richtig":"Falsch"}.</b> ${ok?"":esc(q.o[q.a])+" "}<span class="ea">(${esc(q.ea)})</span></div>
@@ -393,7 +393,7 @@ function quiz(list,title,onBack){
 
 function mock(){
   clearInterval(timer);
-  const list=shuffle(Q.filter(q=>q.t!=="by")).slice(0,30).concat(shuffle(Q.filter(q=>q.t==="by")).slice(0,3)).map(q=>({q,pick:null}));
+  const list=shuffle(Q.filter(q=>q.t!=="by")).slice(0,30).concat(shuffle(Q.filter(q=>q.t==="by")).slice(0,3)).map(q=>({q,pick:null,ord:shuffle([0,1,2,3])}));
   let i=0;const end=Date.now()+60*60*1000;
   app.innerHTML=`<div class="row" style="justify-content:space-between"><button class="back" id="bk" style="margin:0">← Quit</button><span class="timer" id="tm">60:00</span></div>
   <h1 style="margin:8px 0 10px">Mock test</h1><div class="dots" id="dots"></div><div id="body" style="margin-top:14px"></div>`;
@@ -404,7 +404,7 @@ function mock(){
     dots.innerHTML=list.map((x,n)=>`<i class="${n===i?"c":""}" style="${x.pick!==null?"background:var(--muted)":""}"></i>`).join("");
     const it=list[i],q=it.q;
     body.innerHTML=`<div class="qcard">${qHead(q,i,33,true).replace(/Nr\. [^<]*/,i>=30?"Bayern":"Allgemein")}
-      <div class="opts">${q.o.map((o,k)=>`<button class="opt ${it.pick===k?"sel":""}" data-k="${k}"><span class="l">${"abcd"[k]}</span><span>${esc(o)}</span></button>`).join("")}</div>
+      <div class="opts">${it.ord.map((k,p)=>`<button class="opt ${it.pick===k?"sel":""}" data-k="${k}"><span class="l">${"abcd"[p]}</span><span>${esc(q.o[k])}</span></button>`).join("")}</div>
       <div class="row" style="justify-content:space-between">
         <button class="btn" id="pv" ${i?"":"disabled"}>← Back</button>
         ${i<32?`<button class="btn primary" id="nx">Next →</button>`:`<button class="btn primary" id="fin">Hand in</button>`}
@@ -426,7 +426,7 @@ function mock(){
       <span class="muted">${sc>=30?"Exam-ready level.":"Aim for 30+ consistently before the exam."}</span>
       <div class="row" style="justify-content:center;margin-top:8px"><button class="btn primary" id="again">New mock test</button></div></div>
     ${miss.length?`<h2 style="margin-top:22px">Review (${miss.length})</h2><div class="review">${miss.map(x=>`<div class="rv"><span class="nr">Nr. ${x.q.n}</span><br><strong>${esc(x.q.q)}</strong>${showEN?`<div class="muted">${esc(x.q.e)}</div>`:""}<div style="margin-top:6px">${x.pick===null?"Not answered. ":"Your answer: "+esc(x.q.o[x.pick])+". "}<span class="ok">Correct: ${esc(x.q.o[x.q.a])}</span></div><div class="muted" style="margin-top:4px">${esc(x.q.ea)}</div>
-      <details class="rvd"><summary>All options in English + vocabulary</summary><ol type="a" style="margin:8px 0;padding-left:1.4em">${x.q.o.map((o,k)=>`<li><strong>${esc(o)}</strong>, ${esc(x.q.oe[k])}</li>`).join("")}</ol>${vocabTable(x.q)}</details>
+      <details class="rvd"><summary>All options in English + vocabulary</summary><ol type="a" style="margin:8px 0;padding-left:1.4em">${x.ord.map(k=>`<li><strong>${esc(x.q.o[k])}</strong>, ${esc(x.q.oe[k])}</li>`).join("")}</ol>${vocabTable(x.q)}</details>
       <div style="margin-top:8px">${bmBtn(x.q)}</div></div>`).join("")}</div>`:""}`;
     app.querySelectorAll("[data-bm]").forEach(b=>{const q=Q.find(z=>String(z.n)===b.dataset.bm);b.onclick=()=>{toggleBm(q);b.setAttribute("aria-pressed",isBm(q));b.querySelector("span").textContent=isBm(q)?"Bookmarked":"Bookmark"}});
     app.querySelector("#bk").onclick=home;app.querySelector("#again").onclick=mock;window.scrollTo(0,0);
