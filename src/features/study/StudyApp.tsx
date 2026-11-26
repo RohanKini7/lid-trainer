@@ -65,7 +65,7 @@ export default function StudyApp({ selectedState, onChangeState }: Props) {
   const toggleBookmark = (q: Question) => setBookmarks((current) => current.includes(String(q.n)) ? current.filter((id) => id !== String(q.n)) : [...current, String(q.n)]);
   const beginPractice = (list: Question[], title: string, start = 0, ordered = false) => {
     setPracticeList(list); setPracticeTitle(title); setPracticeIndex(start); setSelectedAnswer(null); setSessionCorrect(0);
-    setPracticeOrder(ordered ? [0, 1, 2, 3] : shuffle([0, 1, 2, 3])); setResultIsMock(false); setView('practice');
+    setPracticeOrder(shuffle([0, 1, 2, 3])); setResultIsMock(false); setView('practice');
   };
   const beginMock = () => {
     const general = shuffle(generalQuestions).slice(0, 30);
