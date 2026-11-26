@@ -43,7 +43,8 @@ export default function StudyApp({ selectedState, onChangeState }: Props) {
   const [mockItems, setMockItems] = useState<MockItem[]>([]);
   const [mockIndex, setMockIndex] = useState(0);
   const [secondsLeft, setSecondsLeft] = useState(3600);
-  const [mockScore, setMockScore] = useState(0);\n  const [resultIsMock, setResultIsMock] = useState(false);
+  const [mockScore, setMockScore] = useState(0);
+  const [resultIsMock, setResultIsMock] = useState(false);
   const [mockMisses, setMockMisses] = useState<MockItem[]>([]);
   const [importText, setImportText] = useState('');
   const [notice, setNotice] = useState('');
