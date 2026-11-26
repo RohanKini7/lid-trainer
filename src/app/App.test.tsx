@@ -1,10 +1,10 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import App from './App';
 
 describe('Bundesland onboarding and trainer', () => {
-  beforeEach(() => window.localStorage.clear());
+  beforeEach(() => window.localStorage.clear());\n  afterEach(() => cleanup());
 
   it('requires a Bundesland selection on first visit', () => {
     render(<MemoryRouter><App /></MemoryRouter>);
@@ -53,7 +53,7 @@ describe('Bundesland onboarding and trainer', () => {
     window.localStorage.setItem('lid-en', JSON.stringify(false));
     window.localStorage.setItem('lid-exam-date', JSON.stringify('2027-01-15'));
     render(<MemoryRouter><App /></MemoryRouter>);
-    expect(screen.getByLabelText(/english translations/i)).not.toBeChecked();
+    expect(screen.getAllByRole('checkbox')[0]).not.toBeChecked();
     expect(screen.getByDisplayValue('2027-01-15')).toBeInTheDocument();
     expect(screen.getByText('1/310')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /bookmarks \(1\)/i })).toBeInTheDocument();
