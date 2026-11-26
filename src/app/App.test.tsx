@@ -4,7 +4,8 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import App from './App';
 
 describe('Bundesland onboarding and trainer', () => {
-  beforeEach(() => window.localStorage.clear());\n  afterEach(() => cleanup());
+  beforeEach(() => window.localStorage.clear());
+  afterEach(() => cleanup());
 
   it('requires a Bundesland selection on first visit', () => {
     render(<MemoryRouter><App /></MemoryRouter>);
