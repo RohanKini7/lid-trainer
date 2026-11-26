@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { Bundesland, Question } from '../../types/question';
+import type { Bundesland, BundeslandCode, Question } from '../../types/question';
 import { bavariaQuestions, generalQuestions } from '../../data/question-bank';
-import { getStateQuestions } from '../../data/bundeslaender';
+import { getBundesland, getStateQuestions } from '../../data/bundeslaender';
 import { getQuestionImage } from '../../data/images';
 import { topics } from '../../data/topics';
 
@@ -23,11 +23,11 @@ const shuffle = <T,>(items: T[]) => {
   return result;
 };
 
-interface Props { selectedState: Bundesland; onChangeState: () => void; }
+interface Props { selectedState: Bundesland; onChangeState: () => void; onImportState: (code: BundeslandCode) => void; }
 type View = 'home' | 'topic' | 'practice' | 'mock' | 'result';
 interface MockItem { q: Question; pick: number | null; order: number[]; }
 
-export default function StudyApp({ selectedState, onChangeState }: Props) {
+export default function StudyApp({ selectedState, onChangeState, onImportState }: Props) {
   const questions = useMemo(() => allQuestions(selectedState), [selectedState]);
   const [stats, setStats] = useState<Stats>(() => read(STATS_KEY, {}));
   const [bookmarks, setBookmarks] = useState<string[]>(() => read(BOOKMARKS_KEY, []).map(String));
@@ -97,15 +97,74 @@ export default function StudyApp({ selectedState, onChangeState }: Props) {
     if (next >= practiceList.length) { setView('result'); setMockScore(sessionCorrect); setMockMisses([]); }
     else { setPracticeIndex(next); setSelectedAnswer(null); setPracticeOrder(shuffle([0, 1, 2, 3])); }
   };
-  const exportCode = () => 'LID1-' + (showEnglish ? '1' : '0') + legacyTransferQuestions.map((q) => {
+  const exportLegacyCode = () => 'LID1-' + (showEnglish ? '1' : '0') + legacyTransferQuestions.map((q) => {
     const status = stats[String(q.n)]; return (status ? (status.r ? 1 : 2) : 0) + (bookmarks.includes(String(q.n)) ? 3 : 0);
   }).join('');
+  const exportCode = () => {
+    const payload = {
+      version: 2,
+      selectedState: selectedState.code,
+      examDate,
+      position,
+      showEnglish,
+      stats,
+      bookmarks,
+      mock: view === 'mock' ? {
+        items: mockItems.map((item) => ({ id: String(item.q.n), pick: item.pick, order: item.order })),
+        index: mockIndex,
+        secondsLeft,
+      } : null,
+    };
+    return 'LID2-' + btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+  };
   const importCode = () => {
-    const match = /^LID1-([01])([0-5]+)$/.exec(importText.replace(/\s+/g, ''));
-    if (!match || match[2].length !== legacyTransferQuestions.length) { setNotice('That code is invalid or belongs to a different question catalogue.'); return; }
-    const nextStats: Stats = {}; const nextBookmarks: string[] = [];
-    legacyTransferQuestions.forEach((q, i) => { let value = Number(match[2][i]); if (value >= 3) { nextBookmarks.push(String(q.n)); value -= 3; } if (value) nextStats[String(q.n)] = { r: value === 1 }; });
-    setStats(nextStats); setBookmarks(nextBookmarks); setShowEnglish(match[1] === '1'); setNotice('Progress imported.');
+    const code = importText.replace(/\\s+/g, '');
+    if (code.startsWith('LID1-')) {
+      const match = /^LID1-([01])([0-5]+)$/.exec(code);
+      if (!match || match[2].length !== legacyTransferQuestions.length) { setNotice('That code is invalid or belongs to a different question catalogue.'); return; }
+      const nextStats: Stats = {}; const nextBookmarks: string[] = [];
+      legacyTransferQuestions.forEach((q, i) => { let value = Number(match[2][i]); if (value >= 3) { nextBookmarks.push(String(q.n)); value -= 3; } if (value) nextStats[String(q.n)] = { r: value === 1 }; });
+      setStats(nextStats); setBookmarks(nextBookmarks); setShowEnglish(match[1] === '1'); setNotice('Legacy progress imported. Exam date, position and mock session are only included in LID2 codes.');
+      return;
+    }
+    try {
+      if (!code.startsWith('LID2-')) throw new Error('Unsupported code version');
+      const payload = JSON.parse(decodeURIComponent(escape(atob(code.slice(5)))) ) as {
+        version: number; selectedState: BundeslandCode; examDate: string; position: number; showEnglish: boolean;
+        stats: Stats; bookmarks: string[];
+        mock: null | { items: { id: string; pick: number | null; order: number[] }[]; index: number; secondsLeft: number };
+      };
+      const targetState = getBundesland(payload.selectedState);
+      if (payload.version !== 2 || !targetState || typeof payload.examDate !== 'string' ||
+        !Number.isInteger(payload.position) || payload.position < 0 ||
+        typeof payload.showEnglish !== 'boolean' || !payload.stats || !Array.isArray(payload.bookmarks)) throw new Error('Invalid transfer data');
+      const targetQuestions = [...generalQuestions, ...getStateQuestions(targetState.code)];
+      const findQuestion = (id: string) => targetQuestions.find((q) => String(q.n) === id);
+      let restoredMock: MockItem[] = [];
+      if (payload.mock) {
+        if (!Array.isArray(payload.mock.items) || payload.mock.items.length !== 33 ||
+          !Number.isInteger(payload.mock.index) || payload.mock.index < 0 || payload.mock.index > 32 ||
+          !Number.isInteger(payload.mock.secondsLeft) || payload.mock.secondsLeft < 0 || payload.mock.secondsLeft > 3600) throw new Error('Invalid mock session');
+        restoredMock = payload.mock.items.map((item) => {
+          const q = findQuestion(item.id);
+          if (!q || (item.pick !== null && (!Number.isInteger(item.pick) || item.pick < 0 || item.pick > 3)) ||
+            !Array.isArray(item.order) || item.order.length !== 4 || [...item.order].sort().some((v, i) => v !== i)) throw new Error('Mock session belongs to a different question bank');
+          return { q, pick: item.pick, order: item.order as number[] };
+        });
+      }
+      setStats(payload.stats); setBookmarks(payload.bookmarks.map(String)); setShowEnglish(payload.showEnglish);
+      setExamDate(payload.examDate); setPosition(payload.position);
+      onImportState(targetState.code);
+      if (payload.mock) {
+        setMockItems(restoredMock); setMockIndex(payload.mock.index); setSecondsLeft(payload.mock.secondsLeft);
+        setView('mock'); setNotice('Progress, exam date, question position, Bundesland and active mock exam imported.');
+      } else {
+        setMockItems([]); setView('home');
+        setNotice('Progress, exam date, question position and Bundesland imported.');
+      }
+    } catch {
+      setNotice('That LID2 code is invalid or its question bank is not available on this version.');
+    }
   };
   const totalScore = score(questions);
   const days = Math.ceil((new Date(examDate + 'T00:00:00').getTime() - new Date(new Date().toDateString()).getTime()) / 86400000);
