@@ -32,7 +32,7 @@ export default function App() {
     <main className="main-content">
       {!selectedState ? <BundeslandSetup value={bundesland} onChange={setBundesland} isFirstVisit /> :
         showSettings ? <BundeslandSetup value={bundesland} onChange={(code) => { setBundesland(code); setShowSettings(false); }} /> :
-        <Routes><Route path="*" element={<StudyApp selectedState={selectedState} onChangeState={() => setShowSettings(true)} />} /></Routes>}
+        <Routes><Route path="*" element={<StudyApp selectedState={selectedState} onChangeState={() => setShowSettings(true)} onImportState={setBundesland} />} /></Routes>}
     </main>
     <footer className="app-footer">Made to make exam preparation a little easier.</footer>
   </div>;
