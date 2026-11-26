@@ -60,7 +60,9 @@ button{font:inherit;cursor:pointer}
 .tab{border:1px solid var(--line);background:none;color:var(--muted);padding:7px 14px;border-radius:999px;font-weight:600}
 .tab[aria-selected="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .facts{display:flex;flex-direction:column;gap:0;background:var(--surface);border:1px solid var(--line);border-radius:12px}
-.fact{padding:12px 14px;border-bottom:1px solid var(--line);display:grid;grid-template-columns:5.2rem 1fr;gap:12px}
+.fact{padding:12px 14px;border-bottom:1px solid var(--line);display:grid;grid-template-columns:minmax(5.2rem,10rem) minmax(0,1fr);gap:12px}
+.fact .k{min-width:0;overflow-wrap:anywhere}
+@media(max-width:480px){.fact{grid-template-columns:minmax(0,1fr);gap:3px}.fact .k{line-height:1.25}}
 .fact:last-child{border-bottom:0}
 .fact .k{font-family:var(--mono);font-size:.85rem;color:var(--accent-ink);font-weight:500;padding-top:2px}
 .fact .v{min-width:0}
@@ -89,6 +91,10 @@ button{font:inherit;cursor:pointer}
 .rv .ok{color:var(--good);font-weight:700}
 .toggle{display:flex;align-items:center;gap:8px;font-size:.92rem;color:var(--muted)}
 .note{font-size:.88rem;color:var(--muted);margin-top:22px}
+.site-footer{border-top:1px solid var(--line);margin-top:28px;padding-top:16px;color:var(--muted);font-size:.78rem;line-height:1.55}
+.site-footer p{margin:0 0 8px}
+.site-footer .footer-heart{font-size:.86rem;color:var(--ink)}
+.site-footer .footer-credit,.site-footer .footer-rights{max-width:64ch}
 a{color:var(--accent-ink)}
 .dots{display:flex;flex-wrap:wrap;gap:4px}
 .dots i{width:9px;height:9px;border-radius:2px;background:var(--line)}
@@ -96,7 +102,9 @@ a{color:var(--accent-ink)}
 @media (prefers-reduced-motion:no-preference){.opt{transition:border-color .15s,background .15s}}
 </style>
 
-<div class="wrap" id="app"></div>
+<div class="wrap">
+  <div id="app"></div>
+</div>
 
 <style>
 .pics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;align-items:end}
@@ -229,12 +237,15 @@ let bms=new Set(store.get("lid2-bm",[]).map(String));
 const isBm=q=>bms.has(String(q.n));
 const toggleBm=q=>{const k=String(q.n);bms.has(k)?bms.delete(k):bms.add(k);store.set("lid2-bm",[...bms])};
 const BM_SVG='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"/></svg>';
-const EXAM=new Date("2026-11-25T00:00:00");
+let examDate=store.get("lid-exam-date","2026-11-25");
+const examDateParts=()=>examDate.split("-").map(Number);
+const daysLeft=()=>{const [y,m,d]=examDateParts();if(!y||!m||!d)return null;const now=new Date(),today=Date.UTC(now.getFullYear(),now.getMonth(),now.getDate()),target=Date.UTC(y,m-1,d);return Math.round((target-today)/864e5)};
+const examDateLabel=()=>{const [y,m,d]=examDateParts();return new Date(y,m-1,d).toLocaleDateString(undefined,{day:"numeric",month:"long",year:"numeric"})};
 const app=document.getElementById("app");
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 let timer=null;
-const daysLeft=()=>{const n=new Date();n.setHours(0,0,0,0);return Math.round((EXAM-n)/864e5)};
+
 const score=list=>({n:list.length,right:list.filter(q=>stats[q.n]&&stats[q.n].r).length});
 const save=(q,ok)=>{stats[q.n]={r:ok};store.set("lid2-stats",stats)};
 const tName=id=>TOPICS.find(t=>t.id===id).de;
@@ -274,7 +285,8 @@ function home(){
   <header class="top">
     <span class="eyebrow">Leben in Deutschland · Bayern · official catalogue</span>
     <h1>LiD Test Trainer</h1>
-    <span class="countdown"><span class="mono">${Math.max(d,0)}</span> ${d===1?"day":"days"} until 25 November</span>
+    <span class="countdown"><span class="mono">${d===null?"—":Math.max(d,0)}</span> ${d===1?"day":"days"} until ${esc(examDateLabel())}</span>
+    <div class="exam-setting"><label for="examdate">My exam date</label><input class="btn" type="date" id="examdate" value="${esc(examDate)}" aria-label="Choose your exam date"></div>
     <div class="overall"><span class="bar"><i style="width:${Math.round(all.right/all.n*100)}%"></i></span><span class="mono">${all.right}/${all.n}</span> answered correctly</div>
   </header>
   <section class="mock">
@@ -295,7 +307,7 @@ function home(){
   </section>
   <div class="row" style="justify-content:space-between;margin:6px 0 8px">
     <h2>Topics</h2>
-    <label class="toggle"><input type="checkbox" id="en" ${showEN?"checked":""}> English help</label>
+    <label class="toggle"><input type="checkbox" id="en" ${showEN?"checked":""}> English translations for all questions</label>
   </div>
   <div class="topics">${TOPICS.map(t=>{const s=score(Q.filter(q=>q.t===t.id));return `
     <button class="topic" data-t="${t.id}">
@@ -320,6 +332,7 @@ function home(){
   </section>
   <p class="note">All 300 general questions and the 10 Bavaria questions from the BAMF catalogue (as of 07.05.2025). The catalogue doesn't mark answers, so the answer key and English translations were added for this app. Questions about current office holders (Nr. 72, 73, 75) can change, so check the news before the exam.</p>`;
   app.querySelector("#mk").onclick=mock;
+  app.querySelector("#examdate").onchange=e=>{if(/^\d{4}-\d{2}-\d{2}$/.test(e.target.value)){examDate=e.target.value;store.set("lid-exam-date",examDate);home()}};
   app.querySelector("#en").onchange=e=>{showEN=e.target.checked;store.set("lid-en",showEN)};
   app.querySelectorAll(".topic").forEach(b=>b.onclick=()=>topic(b.dataset.t,"facts"));
   app.querySelector("#mist").onclick=()=>quiz(shuffle(Q.filter(q=>stats[q.n]&&!stats[q.n].r)),"My mistakes");
@@ -374,9 +387,10 @@ function topic(id,tab){
 
 function quiz(list,title,onBack,start,onPos){
   let i=start||0,right=0,done=0;onBack=onBack||home;
-  app.innerHTML=`<button class="back" id="bk">← Back</button><h1>${esc(title)}</h1><div id="body" style="margin-top:14px"></div>`;
+  app.innerHTML=`<button class="back" id="bk">← Back</button><h1>${esc(title)}</h1><label class="toggle" style="display:inline-flex;margin:8px 0 4px"><input type="checkbox" id="global-en" ${showEN?"checked":""}> English translations for all questions</label><div id="body" style="margin-top:14px"></div>`;
   app.querySelector("#bk").onclick=onBack;
   const body=app.querySelector("#body");
+  app.querySelector("#global-en").onchange=e=>{showEN=e.target.checked;store.set("lid-en",showEN);const translations=body.querySelectorAll(".qen,.oe");translations.forEach(el=>el.hidden=!showEN);const control=body.querySelector("#tqb");if(control){control.setAttribute("aria-expanded",String(showEN));control.textContent=showEN?"Hide English translations":"Show English translations"}};
   function render(){
     if(onPos)onPos(i);
     if(i>=list.length){
@@ -387,12 +401,13 @@ function quiz(list,title,onBack,start,onPos){
     }
     const q=list[i];
     body.innerHTML=`<div class="qcard">${qHead(q,i,list.length,true)}
-      <button class="tqb" id="tqb">Translate question</button>
+      <button class="tqb" id="tqb" type="button" aria-expanded="${showEN? "true":"false"}">${showEN?"Hide English translations":"Show English translations"}</button>
       <div class="opts">${shuffle([0,1,2,3]).map((k,p)=>`<button class="opt" data-k="${k}"><span class="l">${"abcd"[p]}</span><span>${esc(q.o[k])}<span class="oe" hidden>${esc(q.oe[k])}</span></span></button>`).join("")}</div>
       <div id="fb"></div></div>`;
     wireBm(body,q);
     const tqb=body.querySelector("#tqb");
-    tqb.onclick=()=>{const e=body.querySelector(".qen");e.hidden=!e.hidden;tqb.textContent=e.hidden?"Translate question":"Hide translation"};
+    body.querySelectorAll(".qen,.oe").forEach(e=>{e.hidden=!showEN});
+    tqb.onclick=()=>{const translations=body.querySelectorAll(".qen,.oe");const show=tqb.getAttribute("aria-expanded")!=="true";translations.forEach(e=>{e.hidden=!show});tqb.setAttribute("aria-expanded",String(show));tqb.textContent=show?"Hide English translations":"Show English translations"};
     body.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{
       if(body.querySelector(".opt.right"))return;
       tqb.hidden=true;
