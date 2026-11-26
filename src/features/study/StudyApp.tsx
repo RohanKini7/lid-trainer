@@ -11,7 +11,9 @@ const BOOKMARKS_KEY = 'lid2-bm';
 const EN_KEY = 'lid-en';
 const POS_KEY = 'lid2-pos';
 const DATE_KEY = 'lid-exam-date';
-const allQuestions = (state: Bundesland) => [...generalQuestions, ...getStateQuestions(state.code)];\n// LID1 is the legacy 310-question format: 300 general questions followed by Bavaria B1–B10.\nconst legacyTransferQuestions = [...generalQuestions, ...bavariaQuestions];
+const allQuestions = (state: Bundesland) => [...generalQuestions, ...getStateQuestions(state.code)];
+// LID1 is the legacy 310-question format: 300 general questions followed by Bavaria B1–B10.
+const legacyTransferQuestions = [...generalQuestions, ...bavariaQuestions];
 const read = <T,>(key: string, fallback: T): T => {
   try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) as T : fallback; } catch { return fallback; }
 };
