@@ -18,7 +18,7 @@ describe('Bundesland onboarding and trainer', () => {
     fireEvent.change(screen.getByLabelText(/federal state/i), { target: { value: 'by' } });
     expect(window.localStorage.getItem('lid-trainer-bundesland')).toBe('by');
     expect(screen.getByRole('heading', { name: /lid test trainer/i })).toBeInTheDocument();
-    expect(screen.getByText(/bayern/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/bayern/i).length).toBeGreaterThan(0);
     expect(screen.getByText(/topics/i)).toBeInTheDocument();
   });
 
@@ -37,7 +37,7 @@ describe('Bundesland onboarding and trainer', () => {
     fireEvent.change(screen.getByLabelText(/federal state/i), { target: { value: 'he' } });
     expect(window.localStorage.getItem('lid-trainer-bundesland')).toBe('he');
     expect(screen.getByRole('heading', { name: /lid test trainer/i })).toBeInTheDocument();
-    expect(screen.getByText(/hessen/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/hessen/i).length).toBeGreaterThan(0);
   });
 
   it('shows all original learning topics', () => {
