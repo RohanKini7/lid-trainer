@@ -70,3 +70,28 @@ test('mock exam applies the 17/33 pass threshold and reviews unanswered question
   await expect(page.getByRole('heading', { name: /review mistakes \(16\)/i })).toBeVisible();
   await expect(page.getByText('Your answer: Not answered').first()).toBeVisible();
 });
+
+test('LID2 restores exam date, selected Bundesland, question position and active mock exam', async ({ page }) => {
+  await page.getByLabel('Federal state (Bundesland)').selectOption('by');
+  await page.getByLabel('My exam date').fill('2027-02-14');
+  await page.getByRole('button', { name: /start mock test/i }).click();
+  await page.getByRole('button', { name: 'Go to question 2', exact: true }).click();
+  await page.locator('.answer-options .answer-option').first().click();
+  await page.getByRole('button', { name: 'Transfer session' }).click();
+  const transferCode = await page.locator('textarea[readonly]').last().inputValue();
+  expect(transferCode).toMatch(/^LID2-/);
+
+  await page.evaluate(() => localStorage.clear());
+  await page.reload();
+  await page.getByLabel('Federal state (Bundesland)').selectOption('hh');
+  await page.getByRole('heading', { name: /lid test trainer/i }).waitFor();
+  await page.locator('input[placeholder="Paste LID1- code"]').fill(transferCode);
+  await page.getByRole('button', { name: 'Import' }).click();
+
+  await expect(page.getByRole('heading', { name: /mock exam · 2\/33/i })).toBeVisible();
+  await expect(page.locator('.answer-options .answer-option.chosen')).toHaveCount(1);
+  await expect(page.getByText(/leben in deutschland · bayern/i)).toBeVisible();
+  await page.getByRole('button', { name: 'Quit' }).click();
+  page.once('dialog', (dialog) => dialog.accept());
+  await expect(page.getByLabel('My exam date')).toHaveValue('2027-02-14');
+});
