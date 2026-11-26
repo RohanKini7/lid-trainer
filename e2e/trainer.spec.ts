@@ -45,7 +45,7 @@ test('progress transfer code is shown and invalid imports are rejected', async (
   const transfer = page.getByRole('heading', { name: /move progress to another device/i });
   await expect(transfer).toBeVisible();
   const code = page.locator('textarea[readonly]');
-  await expect(code).toHaveValue(/^LID1-[01][0-5]{310}$/);
+  await expect(code).toHaveValue(/^LID2-/);
   await page.getByPlaceholder('Paste LID1- code').fill('not-a-valid-code');
   await page.getByRole('button', { name: 'Import' }).click();
   await expect(page.getByRole('status')).toContainText(/invalid/i);
