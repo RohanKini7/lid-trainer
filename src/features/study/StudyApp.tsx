@@ -97,9 +97,6 @@ export default function StudyApp({ selectedState, onChangeState, onImportState }
     if (next >= practiceList.length) { setView('result'); setMockScore(sessionCorrect); setMockMisses([]); }
     else { setPracticeIndex(next); setSelectedAnswer(null); setPracticeOrder(shuffle([0, 1, 2, 3])); }
   };
-  const exportLegacyCode = () => 'LID1-' + (showEnglish ? '1' : '0') + legacyTransferQuestions.map((q) => {
-    const status = stats[String(q.n)]; return (status ? (status.r ? 1 : 2) : 0) + (bookmarks.includes(String(q.n)) ? 3 : 0);
-  }).join('');
   const exportCode = () => {
     const payload = {
       version: 2,
