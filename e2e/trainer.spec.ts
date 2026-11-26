@@ -1,4 +1,7 @@
 import { expect, test } from '@playwright/test';
+import { bavariaQuestions, generalQuestions } from '../src/data/question-bank';
+
+const questions = [...generalQuestions, ...bavariaQuestions];
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/');
@@ -46,4 +49,24 @@ test('progress transfer code is shown and invalid imports are rejected', async (
   await page.getByPlaceholder('Paste LID1- code').fill('not-a-valid-code');
   await page.getByRole('button', { name: 'Import' }).click();
   await expect(page.getByRole('status')).toContainText(/invalid/i);
+});
+
+test('mock exam applies the 17/33 pass threshold and reviews unanswered questions', async ({ page }) => {
+  await page.getByLabel('Federal state (Bundesland)').selectOption('by');
+  await page.getByRole('button', { name: /start mock test/i }).click();
+
+  for (let index = 0; index < 17; index += 1) {
+    await page.getByRole('button', { name: `Go to question ${index + 1}`, exact: true }).click();
+    const questionText = (await page.locator('.question-title').innerText()).trim();
+    const question = questions.find((item) => item.q === questionText);
+    expect(question, `Question should exist in the verified catalogue: ${questionText}`).toBeTruthy();
+    await page.locator('.answer-options .answer-option').filter({ hasText: question!.o[question!.a] }).click();
+  }
+
+  await page.getByRole('button', { name: 'Go to question 33', exact: true }).click();
+  await page.getByRole('button', { name: 'Hand in' }).click();
+  await expect(page.getByRole('heading', { name: 'Passed!' })).toBeVisible();
+  await expect(page.locator('.result-card strong')).toHaveText('17/33');
+  await expect(page.getByRole('heading', { name: /review mistakes \(16\)/i })).toBeVisible();
+  await expect(page.getByText('Your answer: Not answered').first()).toBeVisible();
 });
