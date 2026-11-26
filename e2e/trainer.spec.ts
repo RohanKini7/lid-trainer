@@ -91,7 +91,7 @@ test('LID2 restores exam date, selected Bundesland, question position and active
   await expect(page.getByRole('heading', { name: /mock exam · 2\/33/i })).toBeVisible();
   await expect(page.locator('.answer-options .answer-option.chosen')).toHaveCount(1);
   await expect(page.getByText(/leben in deutschland · bayern/i)).toBeVisible();
-  await page.getByRole('button', { name: 'Quit' }).click();
   page.once('dialog', (dialog) => dialog.accept());
+  await page.getByRole('button', { name: 'Quit' }).click();
   await expect(page.getByLabel('My exam date')).toHaveValue('2027-02-14');
 });
