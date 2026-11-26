@@ -91,6 +91,10 @@ button{font:inherit;cursor:pointer}
 .rv .ok{color:var(--good);font-weight:700}
 .toggle{display:flex;align-items:center;gap:8px;font-size:.92rem;color:var(--muted)}
 .note{font-size:.88rem;color:var(--muted);margin-top:22px}
+.site-footer{border-top:1px solid var(--line);margin-top:28px;padding-top:16px;color:var(--muted);font-size:.78rem;line-height:1.55}
+.site-footer p{margin:0 0 8px}
+.site-footer .footer-heart{font-size:.86rem;color:var(--ink)}
+.site-footer .footer-credit,.site-footer .footer-rights{max-width:64ch}
 a{color:var(--accent-ink)}
 .dots{display:flex;flex-wrap:wrap;gap:4px}
 .dots i{width:9px;height:9px;border-radius:2px;background:var(--line)}
@@ -98,7 +102,14 @@ a{color:var(--accent-ink)}
 @media (prefers-reduced-motion:no-preference){.opt{transition:border-color .15s,background .15s}}
 </style>
 
-<div class="wrap" id="app"></div>
+<div class="wrap">
+  <div id="app"></div>
+  <footer class="site-footer">
+    <p class="footer-heart">Made with love while we were preparing for our own <em>Leben in Deutschland</em> exams — a little vibe-coding project we started just for fun. It grew into something we wanted to share, so it’s now open for everyone to use. We hope it makes your preparation a little easier. Good luck!</p>
+    <p class="footer-credit">Question catalogue: <a href="https://www.bamf.de/SharedDocs/Anlagen/DE/Integration/Einbuergerung/gesamtfragenkatalog-lebenindeutschland.pdf?__blob=publicationFile&v=15" target="_blank" rel="noopener noreferrer">Federal Office for Migration and Refugees (BAMF), “Gesamtfragenkatalog zum Test ‘Leben in Deutschland’ und zum ‘Einbürgerungstest’” (as of 07.05.2025)</a>. The catalogue is the basis for the questions and source images used here. Image credit: Institute for Quality Development in Education (IQB), as credited by BAMF. English translations, answer key and study tools are additions created for this independent study project.</p>
+    <p class="footer-rights">No copyright infringement is intended. All rights remain with their respective copyright holders. This independent project is not affiliated with or endorsed by BAMF or IQB; attribution does not replace any permission required for reuse.</p>
+  </footer>
+</div>
 
 <style>
 .pics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;align-items:end}
