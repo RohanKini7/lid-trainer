@@ -23,15 +23,15 @@ test('mock exam supports navigation, changing answers and submission', async ({ 
   await page.getByRole('button', { name: /start mock test/i }).click();
   await expect(page.getByRole('heading', { name: /mock exam · 1\/33/i })).toBeVisible();
 
-  await page.getByRole('button', { name: 'Go to question 2' }).click();
+  await page.getByRole('button', { name: 'Go to question 2', exact: true }).click();
   await expect(page.getByRole('heading', { name: /mock exam · 2\/33/i })).toBeVisible();
   const firstAnswer = page.locator('.answer-options .answer-option').first();
   await firstAnswer.click();
   await expect(firstAnswer).toHaveClass(/chosen/);
 
-  await page.getByRole('button', { name: 'Go to question 1' }).click();
+  await page.getByRole('button', { name: 'Go to question 1', exact: true }).click();
   await expect(page.getByRole('heading', { name: /mock exam · 1\/33/i })).toBeVisible();
-  await page.getByRole('button', { name: 'Go to question 33' }).click();
+  await page.getByRole('button', { name: 'Go to question 33', exact: true }).click();
   await page.getByRole('button', { name: 'Hand in' }).click();
   await expect(page.getByText(/session complete/i)).toBeVisible();
   await expect(page.getByText(/\/33/).first()).toBeVisible();
