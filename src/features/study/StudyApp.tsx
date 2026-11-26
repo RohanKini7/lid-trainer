@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { Bundesland, Question } from '../../types/question';
-import { generalQuestions } from '../../data/question-bank';
+import { bavariaQuestions, generalQuestions } from '../../data/question-bank';
 import { getStateQuestions } from '../../data/bundeslaender';
 import { getQuestionImage } from '../../data/images';
 import { topics } from '../../data/topics';
@@ -11,7 +11,7 @@ const BOOKMARKS_KEY = 'lid2-bm';
 const EN_KEY = 'lid-en';
 const POS_KEY = 'lid2-pos';
 const DATE_KEY = 'lid-exam-date';
-const allQuestions = (state: Bundesland) => [...generalQuestions, ...getStateQuestions(state.code)];
+const allQuestions = (state: Bundesland) => [...generalQuestions, ...getStateQuestions(state.code)];\n// LID1 is the legacy 310-question format: 300 general questions followed by Bavaria B1–B10.\nconst legacyTransferQuestions = [...generalQuestions, ...bavariaQuestions];
 const read = <T,>(key: string, fallback: T): T => {
   try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) as T : fallback; } catch { return fallback; }
 };
@@ -95,14 +95,14 @@ export default function StudyApp({ selectedState, onChangeState }: Props) {
     if (next >= practiceList.length) { setView('result'); setMockScore(sessionCorrect); setMockMisses([]); }
     else { setPracticeIndex(next); setSelectedAnswer(null); setPracticeOrder(shuffle([0, 1, 2, 3])); }
   };
-  const exportCode = () => 'LID1-' + (showEnglish ? '1' : '0') + questions.map((q) => {
+  const exportCode = () => 'LID1-' + (showEnglish ? '1' : '0') + legacyTransferQuestions.map((q) => {
     const status = stats[String(q.n)]; return (status ? (status.r ? 1 : 2) : 0) + (bookmarks.includes(String(q.n)) ? 3 : 0);
   }).join('');
   const importCode = () => {
     const match = /^LID1-([01])([0-5]+)$/.exec(importText.replace(/\s+/g, ''));
-    if (!match || match[2].length !== questions.length) { setNotice('That code is invalid or belongs to a different question catalogue.'); return; }
+    if (!match || match[2].length !== legacyTransferQuestions.length) { setNotice('That code is invalid or belongs to a different question catalogue.'); return; }
     const nextStats: Stats = {}; const nextBookmarks: string[] = [];
-    questions.forEach((q, i) => { let value = Number(match[2][i]); if (value >= 3) { nextBookmarks.push(String(q.n)); value -= 3; } if (value) nextStats[String(q.n)] = { r: value === 1 }; });
+    legacyTransferQuestions.forEach((q, i) => { let value = Number(match[2][i]); if (value >= 3) { nextBookmarks.push(String(q.n)); value -= 3; } if (value) nextStats[String(q.n)] = { r: value === 1 }; });
     setStats(nextStats); setBookmarks(nextBookmarks); setShowEnglish(match[1] === '1'); setNotice('Progress imported.');
   };
   const totalScore = score(questions);
