@@ -13,7 +13,9 @@ import type { BundeslandCode, Question } from '../../types/question';
  * against pages 112–116. Bayern question wording/options (B1–B10) were
  * compared against pages 117–121. Berlin (BE1–BE10) was compared against
  * pages 122–126, and Brandenburg (BB1–BB10) against pages 127–131.
- * Brandenburg Q4's option order was corrected to match the catalogue.
+ * Bremen (HB1–HB10) was compared against pages 132–136, and Hamburg
+ * (HH1–HH10) against pages 137–141. Brandenburg Q4's option order was
+ * corrected to match the catalogue.
  * No answer keys are marked verified here.
  * Official answer feedback: https://oet.bamf.de/ords/oetut/f?p=534:1:0
  */
@@ -25,8 +27,8 @@ export const stateBankVerification: Record<BundeslandCode, {
   by: { questionTextVerified: ['B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8', 'B9', 'B10'], answerKeysVerified: [] },
   be: { questionTextVerified: ['BE1', 'BE2', 'BE3', 'BE4', 'BE5', 'BE6', 'BE7', 'BE8', 'BE9', 'BE10'], answerKeysVerified: [] },
   bb: { questionTextVerified: ['BB1', 'BB2', 'BB3', 'BB4', 'BB5', 'BB6', 'BB7', 'BB8', 'BB9', 'BB10'], answerKeysVerified: [] },
-  hb: { questionTextVerified: [], answerKeysVerified: [] },
-  hh: { questionTextVerified: [], answerKeysVerified: [] },
+  hb: { questionTextVerified: ['HB1', 'HB2', 'HB3', 'HB4', 'HB5', 'HB6', 'HB7', 'HB8', 'HB9', 'HB10'], answerKeysVerified: [] },
+  hh: { questionTextVerified: ['HH1', 'HH2', 'HH3', 'HH4', 'HH5', 'HH6', 'HH7', 'HH8', 'HH9', 'HH10'], answerKeysVerified: [] },
   he: { questionTextVerified: [], answerKeysVerified: [] },
   mv: { questionTextVerified: [], answerKeysVerified: [] },
   ni: { questionTextVerified: [], answerKeysVerified: [] },
