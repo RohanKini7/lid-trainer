@@ -109,3 +109,15 @@ test('active mock session and selected answers survive a page reload', async ({ 
   await page.getByRole('button', { name: 'Back', exact: true }).click();
   await expect(page.locator('.answer-options .answer-option.chosen')).toHaveCount(1);
 });
+
+test('all-question position tracks navigation and survives returning home and reload', async ({ page }) => {
+  await page.getByLabel('Federal state (Bundesland)').selectOption('by');
+  await page.getByRole('button', { name: /continue at 1/i }).click();
+  await page.locator('.answer-options .answer-option').first().click();
+  await page.getByRole('button', { name: /next question/i }).click();
+  await expect(page.getByText('2 / 310')).toBeVisible();
+  await page.getByRole('button', { name: '← Back' }).click();
+  await expect(page.getByRole('button', { name: /continue at 2/i })).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole('button', { name: /continue at 2/i })).toBeVisible();
+});
