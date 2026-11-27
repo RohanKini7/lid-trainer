@@ -1,5 +1,6 @@
 import type { Bundesland, BundeslandCode, Question } from '../../types/question';
 import { bavariaQuestions } from '../question-bank';
+import { partialStateQuestionBanks } from './partial-questions';
 
 export const bundeslaender: Bundesland[] = [
   { code: 'bw', name: 'Baden-Württemberg', nameEn: 'Baden-Württemberg' },
@@ -22,9 +23,10 @@ export const bundeslaender: Bundesland[] = [
 
 const stateQuestionBanks: Partial<Record<BundeslandCode, Question[]>> = {
   by: bavariaQuestions,
+  ...partialStateQuestionBanks,
 };
 
-/** Empty means the official state bank has not yet been transcribed and verified. */
+/** Returns transcribed questions; incomplete states intentionally return fewer than ten. */
 export function getStateQuestions(code: BundeslandCode): Question[] {
   return stateQuestionBanks[code] ?? [];
 }

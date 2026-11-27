@@ -29,11 +29,34 @@ describe('legacy question data extraction', () => {
     }
   });
 
-  it('registers all 16 Bundesländer without pretending missing banks are complete', () => {
+  it('adds eight non-image state questions to each of the 15 other Bundesländer', () => {
+    const ids: string[] = [];
+    for (const state of bundeslaender) {
+      for (const question of getStateQuestions(state.code)) {
+        ids.push(String(question.n));
+        expect(question.t).toBe(state.code);
+        expect(question.o).toHaveLength(4);
+        expect(question.oe).toHaveLength(4);
+        expect(question.a).toBeGreaterThanOrEqual(0);
+        expect(question.a).toBeLessThan(4);
+        expect(question.im).toBeNull();
+      }
+    }
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it('registers all 16 Bundesländer without pretending partial banks are complete', () => {
     expect(bundeslaender).toHaveLength(16);
     expect(getStateQuestions('by')).toHaveLength(10);
     expect(hasCompleteStateBank('by')).toBe(true);
     expect(hasCompleteStateBank('he')).toBe(false);
-    expect(getStateQuestions('he')).toEqual([]);
+    expect(getStateQuestions('he')).toHaveLength(8);
+    expect(getStateQuestions('he').map((question) => question.n)).toEqual(
+      ['HE2', 'HE3', 'HE4', 'HE5', 'HE6', 'HE7', 'HE9', 'HE10'],
+    );
+    for (const state of bundeslaender.filter((item) => item.code !== 'by')) {
+      expect(getStateQuestions(state.code), state.name).toHaveLength(8);
+      expect(hasCompleteStateBank(state.code), state.name).toBe(false);
+    }
   });
 });
