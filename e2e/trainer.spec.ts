@@ -86,6 +86,8 @@ test('state topic section follows the selected Bundesland and shows its ten ques
     await expect(page.getByRole('heading', { name: state.name, exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Key facts' })).toBeVisible();
     await expect(page.locator('.facts-list')).toContainText(state.fact);
+    await expect(page.locator('.facts-list')).not.toContainText('Welches ist ein Bezirk');
+    await expect(page.locator('.facts-list')).not.toContainText('Für wie viele Jahre');
     await expect(page.getByRole('button', { name: 'All in order' })).toBeVisible();
     await page.getByRole('button', { name: 'All in order' }).click();
     await expect(page.getByText(state.name + ' 1')).toBeVisible();
