@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { Bundesland, BundeslandCode, Question } from '../../types/question';
 import { bavariaQuestions, generalQuestions } from '../../data/question-bank';
-import { getBundesland, getStateQuestions } from '../../data/bundeslaender';
+import { getBundesland, getStateQuestions, hasCompleteStateBank } from '../../data/bundeslaender';
 import { getQuestionImage } from '../../data/images';
 import { topics } from '../../data/topics';
 
@@ -188,8 +188,8 @@ export default function StudyApp({ selectedState, onChangeState, onImportState }
         <div><p className="eyebrow">YOUR EXAM PREPARATION</p><h2>{days >= 0 ? days : 0} <span>days</span></h2><p>until your exam</p><label className="inline-field">My exam date <input type="date" value={examDate} onChange={(e) => setExamDate(e.target.value)} /></label></div>
         <div className="progress-summary"><strong>{totalScore.right}/{totalScore.total}</strong><span>questions answered correctly</span><div className="progress-track"><i style={{ width: (totalScore.total ? totalScore.right / totalScore.total * 100 : 0) + '%' }} /></div></div>
       </section>
-      <section className="mock-banner"><div><p className="eyebrow">MOCK TEST</p><h2>33 questions · 60 minutes</h2><p>30 general + 3 {selectedState.name} questions. Pass mark: 17.</p></div><button className="action-button" disabled={stateQuestions.length !== 10} onClick={beginMock}>Start mock test</button></section>
-      {stateQuestions.length !== 10 && <p className="state-warning">The {selectedState.name} question bank is not yet verified. Mock exams will be enabled when its 10 questions are ready. You can still practise all general questions.</p>}
+      <section className="mock-banner"><div><p className="eyebrow">MOCK TEST</p><h2>33 questions · 60 minutes</h2><p>30 general + 3 {selectedState.name} questions. Pass mark: 17.</p></div><button className="action-button" disabled={!hasCompleteStateBank(selectedState.code)} onClick={beginMock}>Start mock test</button></section>
+      {!hasCompleteStateBank(selectedState.code) && <p className="state-warning">The {selectedState.name} bank has 10 questions, but its required coat-of-arms and map illustrations are still placeholders. Mock exams will be enabled once the correct images are added and checked. You can still practise the questions.</p>}
       <section className="ordered-box"><div><h2>All questions in order</h2><p>Continue where you left off, or jump to a question.</p></div><div className="inline-controls"><button className="action-button" onClick={() => beginPractice(questions, 'All questions in order', position)}>Continue at {position + 1}</button><select id="jump-question" defaultValue={position} aria-label="Jump to question">{questions.map((q, i) => <option key={q.n} value={i}>{questionLabel(q)}</option>)}</select><button className="small-button" onClick={() => beginPractice(questions, 'All questions in order', Number((document.getElementById('jump-question') as HTMLSelectElement).value))}>Go</button></div></section>
       <div className="section-heading"><h2>Topics</h2><label className="toggle-label"><input type="checkbox" checked={showEnglish} onChange={(e) => setShowEnglish(e.target.checked)} /> English translations</label></div>
       <div className="topic-list">{topics.map((item) => { const isStateTopic = item.id === 'by'; const qs = isStateTopic ? stateQuestions : questions.filter((q) => q.t === item.id); const s = score(qs); return <button className="topic-row" key={item.id} onClick={() => { setTopicId(item.id); setView('topic'); }}><span><strong>{isStateTopic ? selectedState.name : item.de}</strong><small>{isStateTopic ? selectedState.nameEn + ': 3 of these 10 come up' : item.en} · {qs.length} questions</small></span><span className="topic-score">{s.right}/{s.total}</span></button>; })}</div>
