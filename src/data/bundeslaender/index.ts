@@ -2,6 +2,7 @@ import type { Bundesland, BundeslandCode, Question } from '../../types/question'
 import { bavariaQuestions } from '../question-bank';
 import { partialStateQuestionBanks } from './partial-questions';
 import { getQuestionImage } from '../images';
+import { hasVerifiedStateBank as checkVerifiedStateBank } from './verification';
 
 export const bundeslaender: Bundesland[] = [
   { code: 'bw', name: 'Baden-Württemberg', nameEn: 'Baden-Württemberg' },
@@ -52,4 +53,9 @@ export function hasCompleteStateBank(code: BundeslandCode): boolean {
 
 export function getBundesland(code: BundeslandCode): Bundesland | undefined {
   return bundeslaender.find((state) => state.code === code);
+}
+
+/** A bank is answer-key verified only after every one of its ten questions is checked against BAMF's online test centre. */
+export function hasVerifiedStateBank(code: BundeslandCode): boolean {
+  return checkVerifiedStateBank(code, getStateQuestions(code));
 }
