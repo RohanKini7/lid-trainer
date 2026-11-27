@@ -32,6 +32,13 @@ test('mock exam supports navigation, changing answers and submission', async ({ 
 
   await page.getByRole('button', { name: 'Go to question 1', exact: true }).click();
   await expect(page.getByRole('heading', { name: /mock exam · 1\/33/i })).toBeVisible();
+
+  // A reload must resume the same active session, including its saved answer and question index.
+  await page.reload();
+  await expect(page.getByRole('heading', { name: /mock exam · 1\/33/i })).toBeVisible();
+  await page.getByRole('button', { name: 'Go to question 2', exact: true }).click();
+  await expect(page.locator('.answer-options .answer-option.chosen')).toHaveCount(1);
+
   await page.getByRole('button', { name: 'Go to question 33', exact: true }).click();
   await page.getByRole('button', { name: 'Hand in' }).click();
   await expect(page.getByText(/session complete/i)).toBeVisible();
@@ -91,4 +98,13 @@ test('state topic section follows the selected Bundesland and shows its ten ques
     await page.getByRole('button', { name: 'All in order' }).click();
     await expect(page.getByText(state.name + ' 1')).toBeVisible();
   }
+});
+
+test('all-question jump position survives a page reload', async ({ page }) => {
+  await page.getByLabel('Federal state (Bundesland)').selectOption('by');
+  const jump = page.getByLabel('Jump to question');
+  await jump.selectOption({ label: 'Nr. 5' });
+  await page.getByRole('button', { name: 'Go', exact: true }).click();
+  await page.reload();
+  await expect(page.getByRole('button', { name: 'Continue at 5' })).toBeVisible();
 });
