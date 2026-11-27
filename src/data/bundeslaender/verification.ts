@@ -9,6 +9,8 @@ import type { BundeslandCode, Question } from '../../types/question';
  * unofficial answer key or mark a bank verified based on plausibility.
  *
  * Source catalogue: BAMF Gesamtfragenkatalog, Stand 07.05.2025.
+ * Bayern question wording/options (B1–B10) were compared against pages
+ * 117–121 of that catalogue. No answer keys are marked verified here.
  * Official answer feedback: https://oet.bamf.de/ords/oetut/f?p=534:1:0
  */
 export const stateBankVerification: Record<BundeslandCode, {
@@ -16,7 +18,7 @@ export const stateBankVerification: Record<BundeslandCode, {
   answerKeysVerified: string[];
 }> = {
   bw: { questionTextVerified: [], answerKeysVerified: [] },
-  by: { questionTextVerified: [], answerKeysVerified: [] },
+  by: { questionTextVerified: ['B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8', 'B9', 'B10'], answerKeysVerified: [] },
   be: { questionTextVerified: [], answerKeysVerified: [] },
   bb: { questionTextVerified: [], answerKeysVerified: [] },
   hb: { questionTextVerified: [], answerKeysVerified: [] },
