@@ -112,6 +112,28 @@ describe('state-bank verification ledger behaviour', () => {
     expect(question?.a).toBe(1);
   });
 
+
+  it('matches the independently cross-checked answer keys for all illustration-based state questions', () => {
+    // Cross-check reference: Level Exams states that its keys were compiled from
+    // two independent solutions and checked against the BAMF online question
+    // catalogue. This is a secondary cross-check, not the project's direct
+    // official verification ledger.
+    const expected: Record<string, [number, number]> = {
+      bw: [0, 1], by: [1, 3], be: [3, 3], bb: [0, 3],
+      hb: [2, 0], hh: [1, 2], he: [0, 2], mv: [2, 2],
+      ni: [2, 0], nw: [1, 2], rp: [0, 0], sl: [3, 1],
+      sn: [3, 3], st: [3, 2], sh: [2, 0], th: [3, 1],
+    };
+
+    for (const state of bundeslaender) {
+      const questions = getStateQuestions(state.code);
+      const q1 = questions.find((question) => String(question.n).endsWith('1'));
+      const q8 = questions.find((question) => String(question.n).endsWith('8'));
+      expect(q1?.a, `${state.code} Q1 coat of arms`).toBe(expected[state.code][0]);
+      expect(q8?.a, `${state.code} Q8 map`).toBe(expected[state.code][1]);
+    }
+  });
+
   it('requires all ten exact IDs in both verification lists', () => {
     const entry = stateBankVerification.by;
     const originalTextChecks = [...entry.questionTextVerified];
