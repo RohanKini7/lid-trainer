@@ -31,7 +31,7 @@ describe('legacy question data extraction', () => {
 
   it('adds eight non-image state questions to each of the 15 other Bundesländer', () => {
     const ids: string[] = [];
-    for (const state of bundeslaender) {
+    for (const state of bundeslaender.filter((item) => item.code !== 'by')) {
       for (const question of getStateQuestions(state.code)) {
         ids.push(String(question.n));
         expect(question.t).toBe(state.code);
