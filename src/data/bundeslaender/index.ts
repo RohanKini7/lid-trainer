@@ -1,6 +1,7 @@
 import type { Bundesland, BundeslandCode, Question } from '../../types/question';
 import { bavariaQuestions } from '../question-bank';
 import { partialStateQuestionBanks } from './partial-questions';
+import { getQuestionImage } from '../images';
 
 export const bundeslaender: Bundesland[] = [
   { code: 'bw', name: 'Baden-Württemberg', nameEn: 'Baden-Württemberg' },
@@ -32,7 +33,21 @@ export function getStateQuestions(code: BundeslandCode): Question[] {
 }
 
 export function hasCompleteStateBank(code: BundeslandCode): boolean {
-  return getStateQuestions(code).length === 10;
+  const questions = getStateQuestions(code);
+  if (questions.length !== 10) return false;
+
+  // Q1 (coat of arms) and Q8 (map) are required visual questions in every
+  // Bundesland bank. A text placeholder must never make a bank exam-ready.
+  const requiredImageQuestions = questions.filter((question) => {
+    const number = String(question.n).replace(/^[A-Z]+/, '');
+    return number === '1' || number === '8';
+  });
+
+  return requiredImageQuestions.length === 2 && requiredImageQuestions.every((question) =>
+    typeof question.im === 'string' &&
+    question.im !== 'text-placeholder' &&
+    Boolean(getQuestionImage(question.im)),
+  );
 }
 
 export function getBundesland(code: BundeslandCode): Bundesland | undefined {
