@@ -155,7 +155,7 @@ describe('state-bank verification ledger behaviour', () => {
 
 describe('remaining state-bank BAMF transcription corrections', () => {
   it('uses the catalogue wording and gendered option order for Q9 and Q10', () => {
-    const audited = ['ni', 'nw', 'rp', 'sl', 'sn', 'st', 'sh', 'th'] as const;
+    const audited = ['bw', 'mv', 'ni', 'nw', 'rp', 'sl', 'sn', 'st', 'sh', 'th'] as const;
     const q9Options = [
       'Erste Ministerin/Erster Minister',
       'Premierministerin/Premierminister',
