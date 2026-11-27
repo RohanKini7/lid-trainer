@@ -26,13 +26,17 @@ const stateQuestionBanks: Partial<Record<BundeslandCode, Question[]>> = {
   ...partialStateQuestionBanks,
 };
 
-/** Returns transcribed questions; incomplete states intentionally return fewer than ten. */
+/** Returns all ten transcribed questions; image questions remain incomplete until their assets are added. */
 export function getStateQuestions(code: BundeslandCode): Question[] {
   return stateQuestionBanks[code] ?? [];
 }
 
 export function hasCompleteStateBank(code: BundeslandCode): boolean {
-  return getStateQuestions(code).length === 10;
+  const questions = getStateQuestions(code);
+  return questions.length === 10 && questions.every((question) => {
+    const questionNumber = Number(String(question.n).replace(/^[A-Z]+/, ''));
+    return (questionNumber !== 1 && questionNumber !== 8) || question.im !== null;
+  });
 }
 
 export function getBundesland(code: BundeslandCode): Bundesland | undefined {
