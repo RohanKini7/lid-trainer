@@ -186,7 +186,7 @@ export default function StudyApp({ selectedState, onChangeState, onImportState }
       const targetState = getBundesland(payload.selectedState);
       if (!targetState) throw new Error('Unknown Bundesland');
       const targetQuestions = [...generalQuestions, ...getStateQuestions(targetState.code)];
-      const validDate = typeof payload.examDate === 'string' && /^\\d{4}-\\d{2}-\\d{2}$/.test(payload.examDate) &&
+      const validDate = typeof payload.examDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(payload.examDate) &&
         !Number.isNaN(Date.parse(payload.examDate)) && new Date(payload.examDate + 'T00:00:00.000Z').toISOString().slice(0, 10) === payload.examDate;
       const validIds = new Set(targetQuestions.map((q) => String(q.n)));
       const validStats = payload.stats && typeof payload.stats === 'object' && !Array.isArray(payload.stats) &&
