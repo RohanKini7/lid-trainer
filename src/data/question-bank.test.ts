@@ -176,7 +176,12 @@ describe('remaining state-bank BAMF transcription corrections', () => {
       expect(q9?.q).toContain('Wie nennt man die Regierungschefin/den Regierungschef');
       expect(q9?.o).toEqual(q9Options);
       expect(q10?.q).toContain('Welche Ministerin/welchen Minister');
-      expect(q10?.o).toEqual(q10Options);
+      expect(q10?.o).toEqual(code === 'bw' ? [
+        'Finanzministerin/Finanzminister',
+        'Justizministerin/Justizminister',
+        'Innenministerin/Innenminister',
+        'Außenministerin/Außenminister',
+      ] : q10Options);
     }
   });
 
