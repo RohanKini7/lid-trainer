@@ -77,3 +77,28 @@ describe('official state-bank verification ledger', () => {
     }
   });
 });
+
+
+describe('state question-bank structural integrity', () => {
+  it('contains exactly one non-empty question for each number 1–10 in every Bundesland', () => {
+    for (const state of bundeslaender) {
+      const questions = getStateQuestions(state.code);
+      expect(questions, state.name).toHaveLength(10);
+      const numbers = questions.map((question) => Number(String(question.n).replace(/^[A-Z]+/, ''))).sort((a, b) => a - b);
+      expect(numbers, state.name).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+
+      for (const question of questions) {
+        expect(question.q.trim(), String(question.n)).not.toBe('');
+        expect(question.e.trim(), String(question.n)).not.toBe('');
+        expect(question.ea.trim(), String(question.n)).not.toBe('');
+        expect(question.o, String(question.n)).toHaveLength(4);
+        expect(question.oe, String(question.n)).toHaveLength(4);
+        expect(question.o.every((option) => option.trim().length > 0), String(question.n)).toBe(true);
+        expect(new Set(question.o).size, String(question.n)).toBe(4);
+        expect(Number.isInteger(question.a), String(question.n)).toBe(true);
+        expect(question.a, String(question.n)).toBeGreaterThanOrEqual(0);
+        expect(question.a, String(question.n)).toBeLessThan(4);
+      }
+    }
+  });
+});
