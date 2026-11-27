@@ -12,37 +12,12 @@ test('first-visit onboarding saves the selected federal state', async ({ page })
   await expect.poll(() => page.evaluate(() => localStorage.getItem('lid-trainer-bundesland'))).toBe('by');
 });
 
-test('state banks with text image placeholders cannot start a mock exam', async ({ page }) => {
-  await page.getByLabel('Federal state (Bundesland)').selectOption('he');
-  const startMock = page.getByRole('button', { name: /start mock test/i });
-  await expect(startMock).toBeDisabled();
-  await expect(page.getByText(/required coat-of-arms and map illustrations are still placeholders/i)).toBeVisible();
-});
-
-test('mock exam supports navigation, changing answers and submission', async ({ page }) => {
-  await page.getByLabel('Federal state (Bundesland)').selectOption('by');
-  await page.getByRole('button', { name: /start mock test/i }).click();
-  await expect(page.getByRole('heading', { name: /mock exam · 1\/33/i })).toBeVisible();
-
-  await page.getByRole('button', { name: 'Go to question 2', exact: true }).click();
-  await expect(page.getByRole('heading', { name: /mock exam · 2\/33/i })).toBeVisible();
-  const firstAnswer = page.locator('.answer-options .answer-option').first();
-  await firstAnswer.click();
-  await expect(firstAnswer).toHaveClass(/chosen/);
-
-  await page.getByRole('button', { name: 'Go to question 1', exact: true }).click();
-  await expect(page.getByRole('heading', { name: /mock exam · 1\/33/i })).toBeVisible();
-
-  // A reload must resume the same active session, including its saved answer and question index.
-  await page.reload();
-  await expect(page.getByRole('heading', { name: /mock exam · 1\/33/i })).toBeVisible();
-  await page.getByRole('button', { name: 'Go to question 2', exact: true }).click();
-  await expect(page.locator('.answer-options .answer-option.chosen')).toHaveCount(1);
-
-  await page.getByRole('button', { name: 'Go to question 33', exact: true }).click();
-  await page.getByRole('button', { name: 'Hand in' }).click();
-  await expect(page.getByText(/session complete/i)).toBeVisible();
-  await expect(page.getByText(/\/33/).first()).toBeVisible();
+test('state banks cannot start mock exams before their answer keys and images are verified', async ({ page }) => {
+  for (const state of [{ code: 'by', name: 'Bayern' }, { code: 'he', name: 'Hessen' }]) {
+    await page.getByLabel('Federal state (Bundesland)').selectOption(state.code);
+    await expect(page.getByRole('button', { name: /start mock test/i })).toBeDisabled();
+    await expect(page.getByText(new RegExp(state.name + ' answer keys have not yet been verified question by question against the official BAMF online test centre', 'i'))).toBeVisible();
+  }
 });
 
 test('progress transfer code is shown and invalid imports are rejected', async ({ page }) => {
