@@ -32,14 +32,14 @@ export const stateBankVerification: Record<BundeslandCode, {
   hh: { questionTextVerified: ['HH1', 'HH2', 'HH3', 'HH4', 'HH5', 'HH6', 'HH7', 'HH8', 'HH9', 'HH10'], answerKeysVerified: [] },
   he: { questionTextVerified: ['HE1', 'HE2', 'HE3', 'HE4', 'HE5', 'HE6', 'HE7', 'HE8', 'HE9', 'HE10'], answerKeysVerified: [] },
   mv: { questionTextVerified: ['MV1', 'MV2', 'MV3', 'MV4', 'MV5', 'MV6', 'MV7', 'MV8', 'MV9', 'MV10'], answerKeysVerified: [] },
-  ni: { questionTextVerified: [], answerKeysVerified: [] },
-  nw: { questionTextVerified: [], answerKeysVerified: [] },
-  rp: { questionTextVerified: [], answerKeysVerified: [] },
-  sl: { questionTextVerified: [], answerKeysVerified: [] },
-  sn: { questionTextVerified: [], answerKeysVerified: [] },
-  st: { questionTextVerified: [], answerKeysVerified: [] },
-  sh: { questionTextVerified: [], answerKeysVerified: [] },
-  th: { questionTextVerified: [], answerKeysVerified: [] },
+  ni: { questionTextVerified: ['NI1', 'NI2', 'NI3', 'NI4', 'NI5', 'NI6', 'NI7', 'NI8', 'NI9', 'NI10'], answerKeysVerified: [] },
+  nw: { questionTextVerified: ['NW1', 'NW2', 'NW3', 'NW4', 'NW5', 'NW6', 'NW7', 'NW8', 'NW9', 'NW10'], answerKeysVerified: [] },
+  rp: { questionTextVerified: ['RP1', 'RP2', 'RP3', 'RP4', 'RP5', 'RP6', 'RP7', 'RP8', 'RP9', 'RP10'], answerKeysVerified: [] },
+  sl: { questionTextVerified: ['SL1', 'SL2', 'SL3', 'SL4', 'SL5', 'SL6', 'SL7', 'SL8', 'SL9', 'SL10'], answerKeysVerified: [] },
+  sn: { questionTextVerified: ['SN1', 'SN2', 'SN3', 'SN4', 'SN5', 'SN6', 'SN7', 'SN8', 'SN9', 'SN10'], answerKeysVerified: [] },
+  st: { questionTextVerified: ['ST1', 'ST2', 'ST3', 'ST4', 'ST5', 'ST6', 'ST7', 'ST8', 'ST9', 'ST10'], answerKeysVerified: [] },
+  sh: { questionTextVerified: ['SH1', 'SH2', 'SH3', 'SH4', 'SH5', 'SH6', 'SH7', 'SH8', 'SH9', 'SH10'], answerKeysVerified: [] },
+  th: { questionTextVerified: ['TH1', 'TH2', 'TH3', 'TH4', 'TH5', 'TH6', 'TH7', 'TH8', 'TH9', 'TH10'], answerKeysVerified: [] },
 };
 
 /** True only when all ten exact question IDs and all ten answer keys are checked. */
