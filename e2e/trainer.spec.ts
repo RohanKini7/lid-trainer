@@ -74,7 +74,7 @@ test('Hamburg question labels follow the selected Bundesland', async ({ page }) 
 });
 
 test('state topic section follows the selected Bundesland and shows its ten questions', async ({ page }) => {
-  for (const state of [{ code: 'be', name: 'Berlin' }, { code: 'hh', name: 'Hamburg' }]) {
+  for (const state of [{ code: 'be', name: 'Berlin', fact: 'Pankow' }, { code: 'hh', name: 'Hamburg', fact: 'Altona' }]) {
     await page.evaluate(() => localStorage.clear());
     await page.reload();
     await page.getByLabel('Federal state (Bundesland)').selectOption(state.code);
@@ -84,6 +84,8 @@ test('state topic section follows the selected Bundesland and shows its ten ques
     await expect(row).toContainText('10 questions');
     await row.click();
     await expect(page.getByRole('heading', { name: state.name, exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Key facts' })).toBeVisible();
+    await expect(page.locator('.facts-list')).toContainText(state.fact);
     await expect(page.getByRole('button', { name: 'All in order' })).toBeVisible();
     await page.getByRole('button', { name: 'All in order' }).click();
     await expect(page.getByText(state.name + ' 1')).toBeVisible();
