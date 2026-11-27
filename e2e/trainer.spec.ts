@@ -72,3 +72,20 @@ test('Hamburg question labels follow the selected Bundesland', async ({ page }) 
   await expect(page.getByText('Welches Wappen gehört zur Freien und Hansestadt Hamburg?')).toBeVisible();
   await expect(page.locator('.question-meta span').nth(1)).toHaveText('Hamburg 1');
 });
+
+test('state topic section follows the selected Bundesland and shows its ten questions', async ({ page }) => {
+  for (const state of [{ code: 'be', name: 'Berlin' }, { code: 'hh', name: 'Hamburg' }]) {
+    await page.evaluate(() => localStorage.clear());
+    await page.reload();
+    await page.getByLabel('Federal state (Bundesland)').selectOption(state.code);
+    const row = page.locator('.topic-row').filter({ has: page.locator('strong', { hasText: state.name }) });
+    await expect(row).toContainText(state.name);
+    await expect(row).toContainText('3 of these 10 come up');
+    await expect(row).toContainText('10 questions');
+    await row.click();
+    await expect(page.getByRole('heading', { name: state.name, exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'All in order' })).toBeVisible();
+    await page.getByRole('button', { name: 'All in order' }).click();
+    await expect(page.getByText(state.name + ' 1')).toBeVisible();
+  }
+});
