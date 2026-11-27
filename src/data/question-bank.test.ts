@@ -152,3 +152,45 @@ describe('state-bank verification ledger behaviour', () => {
     }
   });
 });
+
+describe('remaining state-bank BAMF transcription corrections', () => {
+  it('uses the catalogue wording and gendered option order for Q9 and Q10', () => {
+    const audited = ['ni', 'nw', 'rp', 'sl', 'sn', 'st', 'sh', 'th'] as const;
+    const q9Options = [
+      'Erste Ministerin/Erster Minister',
+      'Premierministerin/Premierminister',
+      'Bürgermeisterin/Bürgermeister',
+      'Ministerpräsidentin/Ministerpräsident',
+    ];
+    const q10Options = [
+      'Justizministerin/Justizminister',
+      'Außenministerin/Außenminister',
+      'Finanzministerin/Finanzminister',
+      'Innenministerin/Innenminister',
+    ];
+
+    for (const code of audited) {
+      const questions = getStateQuestions(code);
+      const q9 = questions.find((question) => String(question.n).endsWith('9'));
+      const q10 = questions.find((question) => String(question.n).endsWith('10'));
+      expect(q9?.q).toContain('Wie nennt man die Regierungschefin/den Regierungschef');
+      expect(q9?.o).toEqual(q9Options);
+      expect(q10?.q).toContain('Welche Ministerin/welchen Minister');
+      expect(q10?.o).toEqual(q10Options);
+    }
+  });
+
+  it('keeps Saarland Q8 wording and Thüringen Q4 options in BAMF order', () => {
+    const saarlandQ8 = getStateQuestions('sl').find((question) => question.n === 'SL8');
+    expect(saarlandQ8?.q).toBe('Welches Bundesland ist das Saarland?');
+
+    const thuringiaQ4 = getStateQuestions('th').find((question) => question.n === 'TH4');
+    expect(thuringiaQ4?.o).toEqual(['14', '16', '18', '20']);
+    expect(thuringiaQ4?.a).toBe(1);
+  });
+
+  it('uses the official Schleswig-Holstein civic-education option wording', () => {
+    const question = getStateQuestions('sh').find((item) => item.n === 'SH6');
+    expect(question?.o[2]).toBe('beim / bei der Landesbeauftragten für politische Bildung');
+  });
+});
