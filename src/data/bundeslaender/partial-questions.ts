@@ -3,15 +3,15 @@ import type { Question } from '../../types/question';
 /**
  * Partial text banks for the 15 non-Bavaria states.
  *
- * BAMF's catalogue provides the wording and four options, but does not mark
- * correct answers. Answer indexes were cross-checked against the independently
- * maintained Leben-in-Deutschland question pages which expose the correct
- * answer after checking against the BAMF online test centre.
+ * The BAMF catalogue provides the wording and four options, but does not mark
+ * correct answers. The answer indexes currently in this file are provisional:
+ * they have not yet been recorded as individually verified in the official
+ * BAMF online test centre. See verification.ts before treating a bank as
+ * exam-ready.
  *
- * Questions 1 and 8 are included with their official wording, choices and
- * checked answer indexes. Until the state-specific BAMF illustrations are
- * added, their image field uses a text-placeholder marker so these banks
- * remain usable in practice and mock exams.
+ * Questions 1 and 8 are included with their wording and choices. Until the
+ * state-specific illustrations are added, their image field uses a
+ * text-placeholder marker so these banks remain usable in practice.
  *
  * IDs include the state code so bookmarks and progress for the same question
  * number in different Bundesländer cannot collide.
