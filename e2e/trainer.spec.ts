@@ -15,7 +15,7 @@ test('first-visit onboarding saves the selected federal state', async ({ page })
 test('Bavaria mock exams remain disabled until its answer keys are verified', async ({ page }) => {
   await page.getByLabel('Federal state (Bundesland)').selectOption('by');
   await expect(page.getByRole('button', { name: /start mock test/i })).toBeDisabled();
-  await expect(page.getByText(/Bayern answer keys have not yet been verified question by question against the official BAMF online test centre/i)).toBeVisible();
+  await expect(page.getByText(/Bayern question text and answer keys have not yet both been fully verified against the official BAMF sources/i)).toBeVisible();
 });
 
 test('progress transfer code is shown and invalid imports are rejected', async ({ page }) => {
