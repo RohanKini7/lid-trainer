@@ -17,7 +17,7 @@ test('state banks with text image placeholders can start a mock exam', async ({ 
   const startMock = page.getByRole('button', { name: /start mock test/i });
   await expect(startMock).toBeEnabled();
   await startMock.click();
-  await expect(page.getByRole('heading', { name: /mock exam · 1\\/33/i })).toBeVisible();
+  await expect(page.getByRole('heading', { name: new RegExp('mock exam · 1/33', 'i') })).toBeVisible();
 });
 
 test('mock exam supports navigation, changing answers and submission', async ({ page }) => {
