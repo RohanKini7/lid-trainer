@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { Bundesland, BundeslandCode, Question } from '../../types/question';
 import { bavariaQuestions, generalQuestions } from '../../data/question-bank';
-import { getBundesland, getStateQuestions, hasCompleteStateBank } from '../../data/bundeslaender';
+import { bundeslaender, getBundesland, getStateQuestions, hasCompleteStateBank } from '../../data/bundeslaender';
 import { getQuestionImage } from '../../data/images';
 import { topics } from '../../data/topics';
 
@@ -188,7 +188,7 @@ export default function StudyApp({ selectedState, onChangeState, onImportState }
       const targetQuestions = [...generalQuestions, ...getStateQuestions(targetState.code)];
       const validDate = typeof payload.examDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(payload.examDate) &&
         !Number.isNaN(Date.parse(payload.examDate)) && new Date(payload.examDate + 'T00:00:00.000Z').toISOString().slice(0, 10) === payload.examDate;
-      const validIds = new Set(targetQuestions.map((q) => String(q.n)));
+      const validIds = new Set([...generalQuestions, ...bundeslaender.flatMap((state) => getStateQuestions(state.code))].map((q) => String(q.n)));
       const validStats = payload.stats && typeof payload.stats === 'object' && !Array.isArray(payload.stats) &&
         Object.entries(payload.stats).every(([id, value]) => validIds.has(id) && value !== null &&
           typeof value === 'object' && typeof (value as { r?: unknown }).r === 'boolean' &&
