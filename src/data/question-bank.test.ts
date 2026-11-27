@@ -29,7 +29,7 @@ describe('legacy question data extraction', () => {
     }
   });
 
-  it('adds eight non-image state questions to each of the 15 other Bundesländer', () => {
+  it('adds all ten state questions to each of the 15 other Bundesländer and leaves image assets blank', () => {
     const ids: string[] = [];
     for (const state of bundeslaender.filter((item) => item.code !== 'by')) {
       for (const question of getStateQuestions(state.code)) {
@@ -39,6 +39,9 @@ describe('legacy question data extraction', () => {
         expect(question.oe).toHaveLength(4);
         expect(question.a).toBeGreaterThanOrEqual(0);
         expect(question.a).toBeLessThan(4);
+        const questionNumber = Number(String(question.n).replace(/^[A-Z]+/, ''));
+        expect(questionNumber).toBeGreaterThanOrEqual(1);
+        expect(questionNumber).toBeLessThanOrEqual(10);
         expect(question.im).toBeNull();
       }
     }
@@ -50,12 +53,12 @@ describe('legacy question data extraction', () => {
     expect(getStateQuestions('by')).toHaveLength(10);
     expect(hasCompleteStateBank('by')).toBe(true);
     expect(hasCompleteStateBank('he')).toBe(false);
-    expect(getStateQuestions('he')).toHaveLength(8);
+    expect(getStateQuestions('he')).toHaveLength(10);
     expect(getStateQuestions('he').map((question) => question.n)).toEqual(
-      ['HE2', 'HE3', 'HE4', 'HE5', 'HE6', 'HE7', 'HE9', 'HE10'],
+      ['HE1', 'HE2', 'HE3', 'HE4', 'HE5', 'HE6', 'HE7', 'HE8', 'HE9', 'HE10'],
     );
     for (const state of bundeslaender.filter((item) => item.code !== 'by')) {
-      expect(getStateQuestions(state.code), state.name).toHaveLength(8);
+      expect(getStateQuestions(state.code), state.name).toHaveLength(10);
       expect(hasCompleteStateBank(state.code), state.name).toBe(false);
     }
   });
