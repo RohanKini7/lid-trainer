@@ -50,21 +50,21 @@ describe('legacy question data extraction', () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
-  it('registers all 16 Bundesländer and requires real Q1/Q8 images for exam readiness', () => {
+  it('registers all 16 Bundesländer and treats ten questions as a complete bank while illustrations are deferred', () => {
     expect(bundeslaender).toHaveLength(16);
     expect(getStateQuestions('by')).toHaveLength(10);
     expect(hasCompleteStateBank('by')).toBe(true);
     expect(hasVerifiedStateBank('by')).toBe(false);
     expect(getStateQuestions('by').find((question) => question.n === 'B1')?.im).not.toBe('text-placeholder');
     expect(getStateQuestions('by').find((question) => question.n === 'B8')?.im).not.toBe('text-placeholder');
-    expect(hasCompleteStateBank('he')).toBe(false);
+    expect(hasCompleteStateBank('he')).toBe(true);
     expect(getStateQuestions('he')).toHaveLength(10);
     expect(getStateQuestions('he').map((question) => question.n)).toEqual(
       ['HE1', 'HE2', 'HE3', 'HE4', 'HE5', 'HE6', 'HE7', 'HE8', 'HE9', 'HE10'],
     );
     for (const state of bundeslaender.filter((item) => item.code !== 'by')) {
       expect(getStateQuestions(state.code), state.name).toHaveLength(10);
-      expect(hasCompleteStateBank(state.code), state.name).toBe(false);
+      expect(hasCompleteStateBank(state.code), state.name).toBe(true);
       expect(hasVerifiedStateBank(state.code), state.name).toBe(false);
     }
   });
