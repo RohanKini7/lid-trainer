@@ -59,5 +59,16 @@ test('Berlin selection uses Berlin state questions, not Bayern labels or questio
   await jump.selectOption({ label: 'Berlin 1' });
   await page.getByRole('button', { name: 'Go', exact: true }).click();
   await expect(page.getByText('Welches Wappen gehört zum Bundesland Berlin?')).toBeVisible();
+  await expect(page.locator('.question-meta span').nth(1)).toHaveText('Berlin 1');
   await expect(page.getByText(/Bayern B[1-9]|Bayern 10/)).toHaveCount(0);
+});
+
+test('Hamburg question labels follow the selected Bundesland', async ({ page }) => {
+  await page.getByLabel('Federal state (Bundesland)').selectOption('hh');
+  const jump = page.getByLabel('Jump to question');
+  await expect(jump.locator('option').last()).toHaveText('Hamburg 10');
+  await jump.selectOption({ label: 'Hamburg 1' });
+  await page.getByRole('button', { name: 'Go', exact: true }).click();
+  await expect(page.getByText('Welches Wappen gehört zur Freien und Hansestadt Hamburg?')).toBeVisible();
+  await expect(page.locator('.question-meta span').nth(1)).toHaveText('Hamburg 1');
 });
