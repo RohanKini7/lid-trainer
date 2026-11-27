@@ -84,7 +84,7 @@ test('state topic section follows the selected Bundesland and shows its ten ques
     await expect(row).toContainText('10 questions');
     await row.click();
     await expect(page.getByRole('heading', { name: state.name, exact: true })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Key facts' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Key facts' })).toBeVisible();
     await expect(page.locator('.facts-list')).toContainText(state.fact);
     await expect(page.getByRole('button', { name: 'All in order' })).toBeVisible();
     await page.getByRole('button', { name: 'All in order' }).click();
