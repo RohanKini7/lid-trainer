@@ -15,8 +15,15 @@ import type { BundeslandCode, Question } from '../../types/question';
  * pages 122–126, and Brandenburg (BB1–BB10) against pages 127–131.
  * Bremen (HB1–HB10) was compared against pages 132–136, Hamburg (HH1–HH10)
  * against pages 137–141, Hessen (HE1–HE10) against pages 142–146, and
- * Mecklenburg-Vorpommern (MV1–MV10) against pages 147–151. Brandenburg Q4's
- * option order was corrected to match the catalogue.
+ * Mecklenburg-Vorpommern (MV1–MV10) against pages 147–151. Niedersachsen
+ * (NI1–NI10) was checked against pages 152–156, Nordrhein-Westfalen (NW1–NW10)
+ * against pages 157–161, Rheinland-Pfalz (RP1–RP10) against pages 162–166,
+ * Saarland (SL1–SL10) against pages 167–171, Sachsen (SN1–SN10) against
+ * pages 172–176, Sachsen-Anhalt (ST1–ST10) against pages 177–181,
+ * Schleswig-Holstein (SH1–SH10) against pages 182–186, and Thüringen
+ * (TH1–TH10) against pages 187–191. Transcription corrections are covered by
+ * regression tests. Brandenburg Q4's option order was corrected to match the
+ * catalogue.
  * No answer keys are marked verified here.
  * Official answer feedback: https://oet.bamf.de/ords/oetut/f?p=534:1:0
  */
