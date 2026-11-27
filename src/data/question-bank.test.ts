@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { allLegacyQuestionsForMigration, bavariaQuestions, generalQuestions } from './question-bank';
-import { bundeslaender, getStateQuestions, hasCompleteStateBank } from './bundeslaender';
+import { bundeslaender, getStateQuestions, hasCompleteStateBank, hasVerifiedStateBank } from './bundeslaender';
 
 describe('legacy question data extraction', () => {
   it('retains all 300 general questions', () => {
@@ -53,6 +53,7 @@ describe('legacy question data extraction', () => {
     expect(bundeslaender).toHaveLength(16);
     expect(getStateQuestions('by')).toHaveLength(10);
     expect(hasCompleteStateBank('by')).toBe(true);
+    expect(hasVerifiedStateBank('by')).toBe(false);
     expect(getStateQuestions('by').find((question) => question.n === 'B1')?.im).not.toBe('text-placeholder');
     expect(getStateQuestions('by').find((question) => question.n === 'B8')?.im).not.toBe('text-placeholder');
     expect(hasCompleteStateBank('he')).toBe(false);
@@ -63,6 +64,16 @@ describe('legacy question data extraction', () => {
     for (const state of bundeslaender.filter((item) => item.code !== 'by')) {
       expect(getStateQuestions(state.code), state.name).toHaveLength(10);
       expect(hasCompleteStateBank(state.code), state.name).toBe(false);
+      expect(hasVerifiedStateBank(state.code), state.name).toBe(false);
+    }
+  });
+});
+
+
+describe('official state-bank verification ledger', () => {
+  it('does not mark any state answer key verified before the BAMF online check is recorded', () => {
+    for (const state of bundeslaender) {
+      expect(hasVerifiedStateBank(state.code), state.name).toBe(false);
     }
   });
 });
