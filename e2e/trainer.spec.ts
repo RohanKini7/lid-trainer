@@ -12,10 +12,12 @@ test('first-visit onboarding saves the selected federal state', async ({ page })
   await expect.poll(() => page.evaluate(() => localStorage.getItem('lid-trainer-bundesland'))).toBe('by');
 });
 
-test('incomplete state banks cannot start a mock exam', async ({ page }) => {
+test('state banks with text image placeholders can start a mock exam', async ({ page }) => {
   await page.getByLabel('Federal state (Bundesland)').selectOption('he');
-  await expect(page.getByRole('button', { name: /start mock test/i })).toBeDisabled();
-  await expect(page.getByText(/question bank is not yet verified/i)).toBeVisible();
+  const startMock = page.getByRole('button', { name: /start mock test/i });
+  await expect(startMock).toBeEnabled();
+  await startMock.click();
+  await expect(page.getByRole('heading', { name: /mock exam · 1\\/33/i })).toBeVisible();
 });
 
 test('mock exam supports navigation, changing answers and submission', async ({ page }) => {
