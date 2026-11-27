@@ -12,10 +12,22 @@ test('first-visit onboarding saves the selected federal state', async ({ page })
   await expect.poll(() => page.evaluate(() => localStorage.getItem('lid-trainer-bundesland'))).toBe('by');
 });
 
-test('Bavaria mock exams remain disabled until its answer keys are verified', async ({ page }) => {
+test('Bavaria mock exams are available with a provisional answer-key notice', async ({ page }) => {
   await page.getByLabel('Federal state (Bundesland)').selectOption('by');
-  await expect(page.getByRole('button', { name: /start mock test/i })).toBeDisabled();
-  await expect(page.getByText(/Bayern question text and answer keys have not yet both been fully verified against the official BAMF sources/i)).toBeVisible();
+  await expect(page.getByRole('button', { name: /start mock test/i })).toBeEnabled();
+  await expect(page.getByText(/answer keys are provisional and may be corrected after official BAMF checks/i)).toBeVisible();
+  await expect(page.getByText(/Treat mock scores as provisional/i)).toBeVisible();
+  await page.getByRole('button', { name: /start mock test/i }).click();
+  await expect(page.getByRole('heading', { name: /mock exam · 1\/33/i })).toBeVisible();
+});
+
+test('all complete Bundesland banks can start provisional mock exams', async ({ page }) => {
+  for (const code of ['bw', 'by', 'be', 'bb', 'hb', 'hh', 'he', 'mv', 'ni', 'nw', 'rp', 'sl', 'sn', 'st', 'sh', 'th']) {
+    await page.evaluate(() => localStorage.clear());
+    await page.reload();
+    await page.getByLabel('Federal state (Bundesland)').selectOption(code);
+    await expect(page.getByRole('button', { name: /start mock test/i }), code).toBeEnabled();
+  }
 });
 
 test('progress transfer code is shown and invalid imports are rejected', async ({ page }) => {
