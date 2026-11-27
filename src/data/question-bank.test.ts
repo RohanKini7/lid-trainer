@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { allLegacyQuestionsForMigration, bavariaQuestions, generalQuestions } from './question-bank';
 import { bundeslaender, getStateQuestions, hasCompleteStateBank, hasVerifiedStateBank } from './bundeslaender';
+import { stateBankVerification } from './bundeslaender/verification';
 
 describe('legacy question data extraction', () => {
   it('retains all 300 general questions', () => {
@@ -99,6 +100,27 @@ describe('state question-bank structural integrity', () => {
         expect(question.a, String(question.n)).toBeGreaterThanOrEqual(0);
         expect(question.a, String(question.n)).toBeLessThan(4);
       }
+    }
+  });
+});
+
+
+describe('state-bank verification ledger behaviour', () => {
+  it('requires all ten exact IDs in both verification lists', () => {
+    const entry = stateBankVerification.by;
+    const originalTextChecks = [...entry.questionTextVerified];
+    const originalAnswerChecks = [...entry.answerKeysVerified];
+    const ids = getStateQuestions('by').map((question) => String(question.n));
+
+    try {
+      entry.questionTextVerified.splice(0, entry.questionTextVerified.length, ...ids);
+      entry.answerKeysVerified.splice(0, entry.answerKeysVerified.length, ...ids);
+      expect(hasVerifiedStateBank('by')).toBe(true);
+      entry.answerKeysVerified.pop();
+      expect(hasVerifiedStateBank('by')).toBe(false);
+    } finally {
+      entry.questionTextVerified.splice(0, entry.questionTextVerified.length, ...originalTextChecks);
+      entry.answerKeysVerified.splice(0, entry.answerKeysVerified.length, ...originalAnswerChecks);
     }
   });
 });
