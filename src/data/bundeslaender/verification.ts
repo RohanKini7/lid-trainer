@@ -1,0 +1,48 @@
+import type { BundeslandCode, Question } from '../../types/question';
+
+/**
+ * Verification ledger for state-specific questions.
+ *
+ * The BAMF PDF publishes question wording and options, but not the answer key.
+ * Correct answers must therefore be checked in the official BAMF online test
+ * centre, one question at a time. Do not populate these lists from an
+ * unofficial answer key or mark a bank verified based on plausibility.
+ *
+ * Source catalogue: BAMF Gesamtfragenkatalog, Stand 07.05.2025.
+ * Official answer feedback: https://oet.bamf.de/ords/oetut/f?p=534:1:0
+ */
+export const stateBankVerification: Record<BundeslandCode, {
+  questionTextVerified: string[];
+  answerKeysVerified: string[];
+}> = {
+  bw: { questionTextVerified: [], answerKeysVerified: [] },
+  by: { questionTextVerified: [], answerKeysVerified: [] },
+  be: { questionTextVerified: [], answerKeysVerified: [] },
+  bb: { questionTextVerified: [], answerKeysVerified: [] },
+  hb: { questionTextVerified: [], answerKeysVerified: [] },
+  hh: { questionTextVerified: [], answerKeysVerified: [] },
+  he: { questionTextVerified: [], answerKeysVerified: [] },
+  mv: { questionTextVerified: [], answerKeysVerified: [] },
+  ni: { questionTextVerified: [], answerKeysVerified: [] },
+  nw: { questionTextVerified: [], answerKeysVerified: [] },
+  rp: { questionTextVerified: [], answerKeysVerified: [] },
+  sl: { questionTextVerified: [], answerKeysVerified: [] },
+  sn: { questionTextVerified: [], answerKeysVerified: [] },
+  st: { questionTextVerified: [], answerKeysVerified: [] },
+  sh: { questionTextVerified: [], answerKeysVerified: [] },
+  th: { questionTextVerified: [], answerKeysVerified: [] },
+};
+
+/** True only when all ten exact question IDs and all ten answer keys are checked. */
+export function hasVerifiedStateBank(code: BundeslandCode, questions: Question[]): boolean {
+  const verification = stateBankVerification[code];
+  if (questions.length !== 10 || !verification) return false;
+
+  const expectedIds = questions.map((question) => String(question.n));
+  return expectedIds.every((id) =>
+    verification.questionTextVerified.includes(id) &&
+    verification.answerKeysVerified.includes(id),
+  ) &&
+    new Set(verification.questionTextVerified).size === 10 &&
+    new Set(verification.answerKeysVerified).size === 10;
+}
