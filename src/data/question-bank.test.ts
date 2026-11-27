@@ -106,6 +106,12 @@ describe('state question-bank structural integrity', () => {
 
 
 describe('state-bank verification ledger behaviour', () => {
+  it('keeps Brandenburg question 4 options in the official BAMF order', () => {
+    const question = getStateQuestions('bb').find((item) => item.n === 'BB4');
+    expect(question?.o).toEqual(['14', '16', '18', '20']);
+    expect(question?.a).toBe(1);
+  });
+
   it('requires all ten exact IDs in both verification lists', () => {
     const entry = stateBankVerification.by;
     const originalTextChecks = [...entry.questionTextVerified];
