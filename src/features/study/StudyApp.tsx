@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { Bundesland, BundeslandCode, Question } from '../../types/question';
 import { bavariaQuestions, generalQuestions } from '../../data/question-bank';
-import { bundeslaender, getBundesland, getStateQuestions, hasCompleteStateBank, hasVerifiedStateBank } from '../../data/bundeslaender';
+import { bundeslaender, getBundesland, getStateQuestions, hasVerifiedStateBank } from '../../data/bundeslaender';
 import { getQuestionImage } from '../../data/images';
 import { topics } from '../../data/topics';
 
