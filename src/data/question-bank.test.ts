@@ -29,7 +29,7 @@ describe('legacy question data extraction', () => {
     }
   });
 
-  it('adds all ten state questions to each of the 15 other Bundesländer and leaves image assets blank', () => {
+  it('adds all ten state questions to each of the 15 other Bundesländer with image placeholders', () => {
     const ids: string[] = [];
     for (const state of bundeslaender.filter((item) => item.code !== 'by')) {
       for (const question of getStateQuestions(state.code)) {
@@ -42,24 +42,25 @@ describe('legacy question data extraction', () => {
         const questionNumber = Number(String(question.n).replace(/^[A-Z]+/, ''));
         expect(questionNumber).toBeGreaterThanOrEqual(1);
         expect(questionNumber).toBeLessThanOrEqual(10);
-        expect(question.im).toBeNull();
+        if (questionNumber === 1 || questionNumber === 8) expect(question.im).toBe('text-placeholder');
+        else expect(question.im).toBeNull();
       }
     }
     expect(new Set(ids).size).toBe(ids.length);
   });
 
-  it('registers all 16 Bundesländer without pretending partial banks are complete', () => {
+  it('registers all 16 Bundesländer and treats placeholder-backed banks as complete', () => {
     expect(bundeslaender).toHaveLength(16);
     expect(getStateQuestions('by')).toHaveLength(10);
     expect(hasCompleteStateBank('by')).toBe(true);
-    expect(hasCompleteStateBank('he')).toBe(false);
+    expect(hasCompleteStateBank('he')).toBe(true);
     expect(getStateQuestions('he')).toHaveLength(10);
     expect(getStateQuestions('he').map((question) => question.n)).toEqual(
       ['HE1', 'HE2', 'HE3', 'HE4', 'HE5', 'HE6', 'HE7', 'HE8', 'HE9', 'HE10'],
     );
     for (const state of bundeslaender.filter((item) => item.code !== 'by')) {
       expect(getStateQuestions(state.code), state.name).toHaveLength(10);
-      expect(hasCompleteStateBank(state.code), state.name).toBe(false);
+      expect(hasCompleteStateBank(state.code), state.name).toBe(true);
     }
   });
 });
