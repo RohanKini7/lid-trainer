@@ -50,3 +50,14 @@ test('progress transfer code is shown and invalid imports are rejected', async (
   await expect(page.getByRole('status')).toContainText(/invalid/i);
 });
 
+
+test('Berlin selection uses Berlin state questions, not Bayern labels or questions', async ({ page }) => {
+  await page.getByLabel('Federal state (Bundesland)').selectOption('be');
+  await expect(page.getByText('LEBEN IN DEUTSCHLAND · BERLIN')).toBeVisible();
+  const jump = page.getByLabel('Jump to question');
+  await expect(jump.locator('option').last()).toHaveText('Berlin 10');
+  await jump.selectOption({ label: 'Berlin 1' });
+  await page.getByRole('button', { name: 'Go', exact: true }).click();
+  await expect(page.getByText('Welches Wappen gehört zum Bundesland Berlin?')).toBeVisible();
+  await expect(page.getByText(/Bayern B[1-9]|Bayern 10/)).toHaveCount(0);
+});
