@@ -27,6 +27,41 @@ interface Props { selectedState: Bundesland; onChangeState: () => void; onImport
 type View = 'home' | 'topic' | 'practice' | 'mock' | 'result';
 interface MockItem { q: Question; pick: number | null; order: number[]; }
 
+const mockStorageKey = (code: BundeslandCode) => `lid2-mock-session:${code}`;
+
+function readSavedMockSession(code: BundeslandCode): { items: MockItem[]; index: number; secondsLeft: number } | null {
+  try {
+    const raw = localStorage.getItem(mockStorageKey(code));
+    if (!raw) return null;
+    const saved = JSON.parse(raw) as {
+      items?: { id?: string; pick?: number | null; order?: number[] }[];
+      index?: number;
+      secondsLeft?: number;
+    };
+    const stateQuestions = getStateQuestions(code);
+    if (!Array.isArray(saved.items) || saved.items.length !== 33 ||
+      !Number.isInteger(saved.index) || saved.index! < 0 || saved.index! > 32 ||
+      !Number.isInteger(saved.secondsLeft) || saved.secondsLeft! < 0 || saved.secondsLeft! > 3600 ||
+      stateQuestions.length !== 10) throw new Error('Invalid saved mock session');
+
+    const used = new Set<string>();
+    const items = saved.items.map((item, index) => {
+      if (typeof item.id !== 'string' || used.has(item.id)) throw new Error('Duplicate or invalid question');
+      used.add(item.id);
+      const bank = index < 30 ? generalQuestions : stateQuestions;
+      const q = bank.find((question) => String(question.n) === item.id);
+      if (!q || (item.pick !== null && (!Number.isInteger(item.pick) || item.pick! < 0 || item.pick! > 3)) ||
+        !Array.isArray(item.order) || item.order.length !== 4 ||
+        [...item.order].sort().some((value, i) => value !== i)) throw new Error('Invalid saved mock item');
+      return { q, pick: item.pick ?? null, order: item.order };
+    });
+    return { items, index: saved.index!, secondsLeft: saved.secondsLeft! };
+  } catch {
+    try { localStorage.removeItem(mockStorageKey(code)); } catch { /* Storage may be unavailable. */ }
+    return null;
+  }
+}
+
 export default function StudyApp({ selectedState, onChangeState, onImportState }: Props) {
   const questions = useMemo(() => allQuestions(selectedState), [selectedState]);
   const [stats, setStats] = useState<Stats>(() => read(STATS_KEY, {}));
@@ -34,7 +69,8 @@ export default function StudyApp({ selectedState, onChangeState, onImportState }
   const [showEnglish, setShowEnglish] = useState(() => read(EN_KEY, true));
   const [position, setPosition] = useState(() => read(POS_KEY, 0));
   const [examDate, setExamDate] = useState(() => read(DATE_KEY, '2026-11-25'));
-  const [view, setView] = useState<View>('home');
+  const [savedMock] = useState(() => readSavedMockSession(selectedState.code));
+  const [view, setView] = useState<View>(savedMock ? 'mock' : 'home');
   const [topicId, setTopicId] = useState('gg');
   const [practiceList, setPracticeList] = useState<Question[]>([]);
   const [practiceTitle, setPracticeTitle] = useState('');
@@ -42,9 +78,9 @@ export default function StudyApp({ selectedState, onChangeState, onImportState }
   const [practiceOrder, setPracticeOrder] = useState<number[]>([]);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [sessionCorrect, setSessionCorrect] = useState(0);
-  const [mockItems, setMockItems] = useState<MockItem[]>([]);
-  const [mockIndex, setMockIndex] = useState(0);
-  const [secondsLeft, setSecondsLeft] = useState(3600);
+  const [mockItems, setMockItems] = useState<MockItem[]>(savedMock?.items ?? []);
+  const [mockIndex, setMockIndex] = useState(savedMock?.index ?? 0);
+  const [secondsLeft, setSecondsLeft] = useState(savedMock?.secondsLeft ?? 3600);
   const [mockScore, setMockScore] = useState(0);
   const [resultIsMock, setResultIsMock] = useState(false);
   const [mockMisses, setMockMisses] = useState<MockItem[]>([]);
@@ -63,11 +99,26 @@ export default function StudyApp({ selectedState, onChangeState, onImportState }
     return () => window.clearInterval(id);
   }, [view]);
   useEffect(() => { if (view === 'mock' && secondsLeft === 0) finishMock(); }, [secondsLeft, view]);
+  useEffect(() => {
+    const key = mockStorageKey(selectedState.code);
+    try {
+      if (view === 'mock' && mockItems.length === 33) {
+        localStorage.setItem(key, JSON.stringify({
+          items: mockItems.map((item) => ({ id: String(item.q.n), pick: item.pick, order: item.order })),
+          index: mockIndex,
+          secondsLeft,
+        }));
+      } else {
+        localStorage.removeItem(key);
+      }
+    } catch { /* The mock remains usable when browser storage is unavailable. */ }
+  }, [view, mockItems, mockIndex, secondsLeft, selectedState.code]);
 
   const stateQuestions = getStateQuestions(selectedState.code);
   const score = (list: Question[]) => ({ total: list.length, right: list.filter((q) => stats[String(q.n)]?.r).length });
   const toggleBookmark = (q: Question) => setBookmarks((current) => current.includes(String(q.n)) ? current.filter((id) => id !== String(q.n)) : [...current, String(q.n)]);
   const beginPractice = (list: Question[], title: string, start = 0) => {
+    if (title === 'All questions in order') setPosition(Math.min(Math.max(start, 0), list.length - 1));
     setPracticeList(list); setPracticeTitle(title); setPracticeIndex(start); setSelectedAnswer(null); setSessionCorrect(0);
     setPracticeOrder(shuffle([0, 1, 2, 3])); setResultIsMock(false); setView('practice');
   };
@@ -133,16 +184,28 @@ export default function StudyApp({ selectedState, onChangeState, onImportState }
         mock: null | { items: { id: string; pick: number | null; order: number[] }[]; index: number; secondsLeft: number };
       };
       const targetState = getBundesland(payload.selectedState);
-      if (payload.version !== 2 || !targetState || typeof payload.examDate !== 'string' ||
-        !Number.isInteger(payload.position) || payload.position < 0 ||
-        typeof payload.showEnglish !== 'boolean' || !payload.stats || !Array.isArray(payload.bookmarks)) throw new Error('Invalid transfer data');
       const targetQuestions = [...generalQuestions, ...getStateQuestions(targetState.code)];
+      const validDate = typeof payload.examDate === 'string' && /^\\d{4}-\\d{2}-\\d{2}$/.test(payload.examDate) &&
+        !Number.isNaN(Date.parse(payload.examDate)) && new Date(payload.examDate + 'T00:00:00.000Z').toISOString().slice(0, 10) === payload.examDate;
+      const validIds = new Set(targetQuestions.map((q) => String(q.n)));
+      const validStats = payload.stats && typeof payload.stats === 'object' && !Array.isArray(payload.stats) &&
+        Object.entries(payload.stats).every(([id, value]) => validIds.has(id) && value !== null &&
+          typeof value === 'object' && typeof (value as { r?: unknown }).r === 'boolean' &&
+          Object.keys(value as object).every((key) => key === 'r'));
+      if (payload.version !== 2 || !targetState || !validDate ||
+        !Number.isInteger(payload.position) || payload.position < 0 || payload.position >= targetQuestions.length ||
+        typeof payload.showEnglish !== 'boolean' || !validStats || !Array.isArray(payload.bookmarks) ||
+        !payload.bookmarks.every((id) => typeof id === 'string' && validIds.has(id)) ||
+        new Set(payload.bookmarks).size !== payload.bookmarks.length) throw new Error('Invalid transfer data');
       const findQuestion = (id: string) => targetQuestions.find((q) => String(q.n) === id);
       let restoredMock: MockItem[] = [];
       if (payload.mock) {
         if (!Array.isArray(payload.mock.items) || payload.mock.items.length !== 33 ||
           !Number.isInteger(payload.mock.index) || payload.mock.index < 0 || payload.mock.index > 32 ||
           !Number.isInteger(payload.mock.secondsLeft) || payload.mock.secondsLeft < 0 || payload.mock.secondsLeft > 3600) throw new Error('Invalid mock session');
+        const mockIds = payload.mock.items.map((item) => item.id);
+        if (new Set(mockIds).size !== 33 || payload.mock.items.slice(0, 30).some((item) => !generalQuestions.some((q) => String(q.n) === item.id)) ||
+          payload.mock.items.slice(30).some((item) => !getStateQuestions(targetState.code).some((q) => String(q.n) === item.id))) throw new Error('Invalid mock composition');
         restoredMock = payload.mock.items.map((item) => {
           const q = findQuestion(item.id);
           if (!q || (item.pick !== null && (!Number.isInteger(item.pick) || item.pick < 0 || item.pick > 3)) ||
